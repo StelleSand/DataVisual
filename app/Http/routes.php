@@ -14,8 +14,3 @@
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('importPower', function () {
-    return view('importPower');
-});
-Route::get('importOrder', 'ExcelImportController@importOrderRecord');
-Route::get('importPower', 'ExcelImportController@importPowerRecord');

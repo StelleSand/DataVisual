@@ -17,7 +17,7 @@ class CreateChannelRecordTable extends Migration
             $table->bigIncrements('id');
             $table->integer('channel_id')->unsigned();
             $table->foreign('channel_id')->references('id')->on('channel');
-            $table->enum('record_type',array('power','temperature'))->default('power');
+            $table->enum('record_type',array('power','temperature'));
             $table->dateTime('date');
             $table->double('value');
         });
