@@ -19,8 +19,8 @@ class CreateChannelTable extends Migration
             $table->longText('detail');
             $table->integer('channel_number');
             $table->string('receiver_id');
-            $table->integer('nominal_power');
-            $table->double('power_factor');
+            $table->double('nominal_power')->default(0);
+            $table->double('power_factor')->default(1);
             $table->integer('create_user')->unsigned();
             $table->foreign('create_user')->references('id')->on('users');
         });
