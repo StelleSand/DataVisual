@@ -17,5 +17,6 @@ Route::get('/', function () {
 Route::get('importPower', function () {
     return view('importPower');
 });
+Route::get('/test','TestController@testDiagram');
 Route::get('importOrder', 'ExcelImportController@importOrderRecord');
 Route::get('importPower', 'ExcelImportController@importPowerRecord');
