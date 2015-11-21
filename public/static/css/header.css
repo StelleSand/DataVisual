@@ -1,0 +1,44 @@
+.usericon{
+    width: 22px;
+    height: 22px;
+}
+.brandicon{
+    width: 20px;
+    height: 20px;
+}
+　.skin-box-bd{background:none;}
+　　.menu-list{background:none;}.link{background:none;}
+　　.menu{background:none;}
+　　.all-cats{background:none;}
+　　.all-cats{display:none;}
+　　.menu-list.menu.title{color:#CF6AA6;}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+.first{
+    margin-top: 20px;
+}
+/*.navbar-bg{
+    background: transparent;
+}*/
+/*.navbar-brand-text{
+    color:white;
+}*/
+.navbar-a{
+    background-color:transparent;
+    /*color: white;*/
+}
+.navbar-a:hover{
+    background-color:rgba(223,112,75,0.8);
+    color:white;
+}
+.nav>li>a:hover{
+    color: #ffffff;
+}
+.unresize{
+    resize: none;
+}

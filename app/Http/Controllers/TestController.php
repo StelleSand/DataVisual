@@ -217,7 +217,17 @@ class TestController extends Controller{
         $charts = array();
         array_push($charts,$this->makeChart1());
         array_push($charts,$this->makeChart2());
-        //dump($charts);
+        foreach($charts as $chart_index => $chart)
+        {
+            foreach($chart as $point_index => $point)
+            {
+                foreach($point as $value_index => $value)
+                {
+                    if(is_numeric($value))
+                        $charts[$chart_index][$point_index][$value_index] = round($value ,2);
+                }
+            }
+        }
         return view('test',['date'=>$charts]);
     }
     protected function makeChart1()
