@@ -359,7 +359,7 @@ class TestController extends Controller{
             $chartPoint = array();
             $chartPoint['period'] = $this->timeStampToString($this->timePoints[$i]);
             $chartPoint['allPower'] = $allPowerPoints[$i];
-            $chartPoint['producePower'] = $sangeluziPowerPoints[$i] + $kaishuiluPowerPoints[$i] + $zhengbaoluPowerPoints[$i] + $baowentaiPowerPoints[$i] + $paifengshanPowerPoints[$i] + $mianluPowerPoints[$i];
+            $chartPoint['producePower'] = $sangeluziPowerPoints[$i] + $kaishuiluPowerPoints[$i] + $zhengbaoluPowerPoints[$i] + $baowentaiPowerPoints[$i] + $paifengshanPowerPoints[$i];
             $chartPoint['frontPower'] = $zhanguibingxiangPowerPoints[$i] + $kelechazuoPowerPoints[$i];
             $chartPoint['storagePower'] = $sangebingxiangPowerPoints[$i];
            //将计算后的点加入到chartPoints中;
