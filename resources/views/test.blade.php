@@ -69,6 +69,57 @@
     });
     </script>
 </div>
+
+<h1>第三张图表</h1>
+<div id="graph_3"></div>
+<div id="code_3" name="codepre" style="" class="prettyprint linenums">
+    <script>
+    var day_data = [
+    <?php $PointNumber = count($date);?>
+    @for($i = 0;$i < $PointNumber ; $i++ )
+        <?php $PointNumber2 = count($date[$i]);?>
+        @for($j = 0;$j < $PointNumber2 ; $j++ )
+            @if($i == 2)
+                {"period": "{{$date[$i][$j]['period']}}", "licensed": "{{$date[$i][$j]['allSaleAmount']}}", "sorned": "{{$date[$i][$j]['malatangSaleAmount']}}", "sorned1": "{{$date[$i][$j]['mianleiSaleAmount']}}","sorned2": "{{$date[$i][$j]['xiaochiSaleAmount']}}","sorned3": "{{$date[$i][$j]['yinliaoSaleAmount']}}","sorned4": "{{$date[$i][$j]['zhengdianSaleAmount']}}"},
+            @endif
+
+            @endfor
+    @endfor
+    ];
+    Morris.Line({
+    element: 'graph_3',
+    data: day_data,
+    xkey: 'period',
+    ykeys: ['licensed', 'sorned','sorned1','sorned2','sorned3','sorned4'],
+    labels: ['总销售额', '麻辣烫销售额','面类销售额','小吃销售额','饮料销售额','蒸点销售额']
+    });
+    </script>
+</div>
+<h1>第四张图表</h1>
+<div id="graph_4"></div>
+<div id="code_4" name="codepre" style="" class="prettyprint linenums">
+    <script>
+    var day_data = [
+    <?php $PointNumber = count($date);?>
+    @for($i = 0;$i < $PointNumber ; $i++ )
+        <?php $PointNumber2 = count($date[$i]);?>
+        @for($j = 0;$j < $PointNumber2 ; $j++ )
+            @if($i == 3)
+                {"period": "{{$date[$i][$j]['period']}}", "licensed": "{{$date[$i][$j]['allPower']}}", "sorned": "{{$date[$i][$j]['producePower']}}", "sorned1": "{{$date[$i][$j]['frontPower']}}","sorned2": "{{$date[$i][$j]['storagePower']}}"},
+            @endif
+
+            @endfor
+    @endfor
+    ];
+    Morris.Line({
+    element: 'graph_4',
+    data: day_data,
+    xkey: 'period',
+    ykeys: ['licensed', 'sorned','sorned1','sorned2'],
+    labels: ['总耗电', '生产耗电','前厅耗电','存储耗电']
+    });
+    </script>
+</div>
 </body>
 <script>
     $(function () {
