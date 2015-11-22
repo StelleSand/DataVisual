@@ -38,7 +38,7 @@
     data: day_data,
     xkey: 'period',
     ykeys: ['licensed', 'sorned','sorned1'],
-    labels: ['总用电量', '保温台用电','面类用电／销售量']
+    labels: ['面炉用电', '保温台用电','面类用电／销售量']
     });
 </srript>
 </div>
