@@ -19,7 +19,7 @@ class CreateChartTable extends Migration
             $table->longText('detail');
             $table->integer('create_user')->unsigned();
             $table->foreign('create_user')->references('id')->on('users');
-            $table->dateTime('create_time');
+            $table->timestamps();
         });
     }
 

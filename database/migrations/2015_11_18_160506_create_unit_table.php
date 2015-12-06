@@ -20,6 +20,7 @@ class CreateUnitTable extends Migration
             $table->longText('formula');
             $table->integer('create_user')->unsigned();
             $table->foreign('create_user')->references('id')->on('users');
+            $table->timestamps();
         });
     }
 

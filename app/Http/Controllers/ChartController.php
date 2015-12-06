@@ -8,32 +8,30 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Http\Controllers;
+use App\Merchandise;
 use Illuminate\Support\Facades\DB;
-
-class TestController extends Controller{
+use App\MerchandiseClass;
+use App\Channel;
+class ChartController extends Controller{
     protected $start_time;//起始时间
     protected $end_time;//结束时间
     protected $split_number;//图表取点个数
     protected $timePoints;//计算得出的时间点数组
     protected $split_space;//计算得出的每两个时间点间隔
+    protected $user_id;//预设使用制表的用户
+    protected $user;//预设用户Model
+    protected $roundNumber;//本类计算结果保留位数
 
-    //定义各个表字段名
-    protected $merchandise_class_table_name ='merchandise_class';
-    protected $merchandise_table_name = 'merchandise';
-    protected $merchandise_table_foreign_key_name = 'merchandise_class';
-    protected $order_table_name = 'orders';
-    protected $order_table_foreign_key_name = 'merchandise_id';
-    protected $order_table_quantityColumn_name = 'quantity';
-    protected $order_table_priceColumn_name = 'price';
-
-    protected $channel_record_table_name = 'channel_record';
-    protected $channel_record_table_foreign_key_name = 'channel_id';
-    protected $channel_record_table_valueColumn_name = 'value';
 
     //设置sale_amount和sale_volume数组，用以减少重复计算
     protected $merchandise_class_sale_amount = array();
     protected $merchandise_class_sale_volume = array();
+
+
+    //设置channel_average_power数组，用以减少重复计算
+    protected $channel_average_power = array();
 
 
     public function __construct()
@@ -45,11 +43,20 @@ class TestController extends Controller{
         $this->timePoints = array();
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
+        //初始化制表用户
+        $this->user_id = 1;
+        $this->user = User::find($this->user_id);
+        //设置所有计算保留为小数点后两位
+        $this->roundNumber = 2;
         //构建等间隔时间点数组
-        //第一个点就是开始点
-        $time_point = $this->start_time;
-        array_push($this->timePoints,$time_point);
-        for($i = 1; $i <= $this->split_number - 1; $i++)
+        //第一个点为开始点往前推算split_space时间间隔的点，用于计算第一个时间点的值,offset 为 -1
+        //实际上timePoints数组有split_number + 1个点但是由于第一个点下标为-1,所以前端并不会使用，而会忽略这个下标为-1的点
+        //此处需要严重注意：尽管这个类中timePoints数组有split_number + 1个点，
+        //但是返回给前端的points数组下标从0开始，且只有split_number个点！！！
+        $time_point = $this->start_time - $this->split_space;
+        //array_push($this->timePoints,$time_point);
+        $this->timePoints[-1] = $time_point;
+        for($i = 0; $i < $this->split_number; $i++)
         {
             $time_point += $this->split_space;
             //将中间点压入数组
@@ -63,75 +70,37 @@ class TestController extends Controller{
     }
 
     /*
-     *获取指定表的时序均值数组:即求瞬时值，而非累计值
-     *参数为（表名称，外键字段名字，外键字段值,需要获取值的字段名,时间戳字段名[默认为'date']）
-     *时间参数从类中的属性获取，默认时间比较采用date字段。
-     *
+     * 本类保留小数点后位数函数
+     * 默认保留两位小数，可根据需求调整返回前端的实数保留位数
      * */
-    protected function getTablePointsAverageValue($table_name,$foreign_key_name,$foreign_key_id,$value_column_name,$datetime_column_name = 'date')
+    protected function valueRound($value)
     {
-        $Points = array();
-        for($i = 0;$i < $this->split_number; $i++) {
-            //选取对应时间段数据
-            $timePoint_points = DB::table($table_name)->where($foreign_key_name,'=',$foreign_key_id)->whereBetween($datetime_column_name,array($this->timeStampToString($this->timePoints[$i] - $this->split_space / 2),$this->timeStampToString($this->timePoints[$i] + $this->split_space / 2)))->get();
-            $timePoint_value_sum = 0;
-            //获取对应时间点附近数据和
-            foreach($timePoint_points as $timePoint_point)
-            {
-                $timePoint_value_sum += $timePoint_point->$value_column_name;
-            }
-            //求对应时间点附近最终数据值
-            //防止除0
-            if(count($timePoint_points) == 0)
-                $timePoint_value = 0;
-            else
-                $timePoint_value = $timePoint_value_sum / count($timePoint_points);
-            //将获得的最终结果加入到channelPoints中
-            array_push($Points,$timePoint_value);
-        }
-        return $Points;
+        return round($value ,$this->roundNumber);
     }
 
     /*
-     * 获取指定channel_id的power时序均值数组
+     *获取channel表的时序均值数组:即求瞬时值，而非累计值
+     * 参数为(channel_id)
      * */
     protected function getPowerAverageValue($channel_id)
     {
-        return $this->getTablePointsAverageValue($this->channel_record_table_name,$this->channel_record_table_foreign_key_name,$channel_id,$this->channel_record_table_valueColumn_name);
-    }
-
-    /*
-     *获取指定表的时序和值数组:即求每个点周围的累计值，而非均值或总累计值
-     *参数为（表名称，外键字段名字，外键字段值,需要获取值的字段名,取值时需要在表内做乘法运算的字段名[默认为null,null则直接取，不做运算],时间戳字段名[默认为'date']）
-     *时间参数从类中的属性获取，默认时间比较采用date字段。
-     *获取销量则直接取value_column_name = quantity即可，获取销售额则同时应加上value_plus_column_name = price
-     * */
-
-    protected function getTablePointsSumValue($table_name,$foreign_key_name,$foreign_key_id,$value_column_name,$value_plus_column_name = null,$datetime_column_name = 'date')
-    {
-        $Points = array();
+        //如果channel的瞬时值数组已经被设置，直接返回
+        if(isset($this->channel_average_power[$channel_id]))
+            return $this->channel_average_power[$channel_id];
+        $points = array();
+        //获取Channel的Model
+        $channel = Channel::find($channel_id);
         for($i = 0;$i < $this->split_number; $i++) {
-            //选取对应时间段数据
-            $timePoint_points = DB::table($table_name)->where($foreign_key_name,'=',$foreign_key_id)->whereBetween($datetime_column_name,array($this->timeStampToString($this->timePoints[$i] - $this->split_space / 2),$this->timeStampToString($this->timePoints[$i] + $this->split_space / 2)))->get();
-            $timePoint_value_sum = 0;
-            //获取对应时间点附近数据和
-            foreach($timePoint_points as $timePoint_point)
-            {
-                if(is_null($value_plus_column_name))
-                    $timePoint_value_sum += $timePoint_point->$value_column_name;
-                else
-                    $timePoint_value_sum += $timePoint_point->$value_column_name * $timePoint_point->$value_plus_column_name;
-            }
-            //将获得的最终结果加入到channelPoints中
-            array_push($Points,$timePoint_value_sum);
+            //计算每个时间点对应channelAverageValue
+            $points[$i] = $this->valueRound($channel->getAveragePower($this->timeStampToString($this->timePoints[$i - 1]), $this->timeStampToString($this->timePoints[$i])));
         }
-        return $Points;
+        $this->channel_average_power[$channel_id] = $points;
+        return $points;
     }
-
 
     /*
      * 获取指定种类商品销售额数组
-     * 参数为(商品种类id,商品种类表名字[],商品表名字[],商品表外键名[],订单表名[],订单表外键名[])
+     * 参数为(商品种类id)
      * */
     protected function getMerchandiseClassSalesAmount($merchandise_class_id)
     {
@@ -139,24 +108,13 @@ class TestController extends Controller{
         if(isset($this->merchandise_class_sale_amount[$merchandise_class_id]))
             return $this->merchandise_class_sale_amount[$merchandise_class_id];
         $points = array();
-        //初始化points数组
-        for($i = 0;$i < $this->split_number; $i++)
-            $points[$i] = 0;
-        //获取所有属于此商品种类的商品列表
-        $merchandises = DB::table($this->merchandise_table_name)->where($this->merchandise_table_foreign_key_name,'=',$merchandise_class_id)->get();
-        //分别统计每种商品在特定时间点的销售额，并累加到商品种类的销售额上
-        foreach($merchandises as $merchandise)
-        {
-            //获取每种商品在所有时间点的销售额数组
-            $merchandiseValuePoints = $this->getTablePointsSumValue($this->order_table_name, $this->order_table_foreign_key_name, $merchandise->id,$this->order_table_quantityColumn_name, $this->order_table_priceColumn_name );
-            //在每个时间点进行累加
-            for($i = 0;$i < $this->split_number; $i++)
-                //将商品销售额累加到商品种类销售额上
-                $points[$i] += $merchandiseValuePoints[$i];
+        //获取商品种类Model
+        $merchandise_class = MerchandiseClass::find($merchandise_class_id);
+        for($i = 0;$i < $this->split_number; $i++) {
+            //计算每个时间点对应销售额数据
+            $points[$i] = $merchandise_class->getCumulativeSaleAmount($this->timeStampToString($this->timePoints[$i - 1]), $this->timeStampToString($this->timePoints[$i]));
         }
-        //设置商品种类的销售额数组
         $this->merchandise_class_sale_amount[$merchandise_class_id] = $points;
-        //最后获得累加后的商品种类销售额，返回
         return $points;
     }
 
@@ -170,24 +128,13 @@ class TestController extends Controller{
         if(isset($this->merchandise_class_sale_volume[$merchandise_class_id]))
             return $this->merchandise_class_sale_volume[$merchandise_class_id];
         $points = array();
-        //初始化points数组
-        for($i = 0;$i < $this->split_number; $i++)
-            $points[$i] = 0;
-        //获取所有属于此商品种类的商品列表
-        $merchandises = DB::table($this->merchandise_table_name)->where($this->merchandise_table_foreign_key_name,'=',$merchandise_class_id)->get();
-        //分别统计每种商品在特定时间点的销量，并累加到商品种类的销量上
-        foreach($merchandises as $merchandise)
-        {
-            //获取每种商品在所有时间点的销量数组
-            $merchandiseValuePoints = $this->getTablePointsSumValue($this->order_table_name, $this->order_table_foreign_key_name, $merchandise->id,$this->order_table_quantityColumn_name );
-            //在每个时间点进行累加
-            for($i = 0;$i < $this->split_number; $i++)
-                //将商品销售额累加到商品种类销量上
-                $points[$i] += $merchandiseValuePoints[$i];
+        //获取商品种类Model
+        $merchandise_class = MerchandiseClass::find($merchandise_class_id);
+        for($i = 0;$i < $this->split_number; $i++) {
+            //计算每个时间点对应销量数据
+            $points[$i] = $merchandise_class->getCumulativeSaleVolume($this->timeStampToString($this->timePoints[$i - 1]), $this->timeStampToString($this->timePoints[$i]));
         }
-        //设置商品种类的销售量数组
         $this->merchandise_class_sale_volume[$merchandise_class_id] = $points;
-        //最后获得累加后的商品种类销量，返回
         return $points;
     }
 
@@ -199,7 +146,7 @@ class TestController extends Controller{
         $points = array();
         for($i = 0;$i < $this->split_number; $i++)
             $points[$i] = 0;
-        $merchandise_classes = DB::table($this->merchandise_class_table_name)->where('create_user','=','1')->get();
+        $merchandise_classes = $this->user->merchandiseClasses()->get();
         foreach($merchandise_classes as $merchandise_class)
         {
             $merchandise_points = $this->getMerchandiseClassSalesAmount($merchandise_class->id);
@@ -216,7 +163,7 @@ class TestController extends Controller{
         $points = array();
         for($i = 0;$i < $this->split_number; $i++)
             $points[$i] = 0;
-        $merchandise_classes = DB::table($this->merchandise_class_table_name)->where('create_user','=','1')->get();
+        $merchandise_classes = $this->user->merchandiseClasses()->get();
         foreach($merchandise_classes as $merchandise_class)
         {
             $merchandise_points = $this->getMerchandiseClassSalesVolume($merchandise_class->id);
@@ -225,7 +172,6 @@ class TestController extends Controller{
         }
         return $points;
     }
-
 
     public function testDiagram()
     {
@@ -253,7 +199,7 @@ class TestController extends Controller{
         $chartPoints = array();
         //设置allPower的channel_id为2
         $allPowerChannelID = 2;
-        $allPowerPoints = $this->getTablePointsAverageValue('channel_record','channel_id',$allPowerChannelID,'value');
+        $allPowerPoints = $this->getPowerAverageValue($allPowerChannelID);
         $allSaleAmount = $this->getAllMerchandiseClassSaleAmount();
         $allSaleVolume = $this->getAllMerchandiseClassSaleVolume();
         for($i = 0;$i < $this->split_number; $i++) {

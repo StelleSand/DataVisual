@@ -20,7 +20,7 @@ class CreateMerchandiseTable extends Migration
             $table->double('pricing');
             $table->integer('merchandise_class')->unsigned();
             $table->foreign('merchandise_class')->references('id')->on('merchandise_class');
-            $table->dateTime('create_time');
+            $table->timestamps();
         });
     }
 

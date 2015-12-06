@@ -2,8 +2,10 @@
 
 namespace App\Console;
 
+use App\Jobs\InsertExcel;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Queue;
 
 class Kernel extends ConsoleKernel
 {
@@ -26,5 +28,9 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('inspire')
                  ->hourly();
+        $schedule->call(function(){
+            //计划任务：每分钟执行InsertExcel
+            Queue::push(new InsertExcel());
+        })->everyMinute()->withoutOverlapping();
     }
 }

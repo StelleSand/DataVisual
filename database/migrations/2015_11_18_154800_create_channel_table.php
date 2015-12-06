@@ -23,6 +23,7 @@ class CreateChannelTable extends Migration
             $table->double('power_factor')->default(1);
             $table->integer('create_user')->unsigned();
             $table->foreign('create_user')->references('id')->on('users');
+            $table->timestamps();
         });
     }
 
