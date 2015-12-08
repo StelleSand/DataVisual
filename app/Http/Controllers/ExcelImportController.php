@@ -13,11 +13,10 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 set_time_limit(0);
 class ExcelImportController extends Controller {
-    public function importOrderRecord()
+    public function importRecord()
     {
         //将insertExcel任务加入队列中.
-        $this->dispatch(
-            new InsertExcel()
-        );
+        $insert = new InsertExcel();
+        $insert->handle();
     }
 }
