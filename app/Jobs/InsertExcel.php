@@ -162,6 +162,13 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         {
             //查找merchandise_class中的种类的id。
             $merchandise_class = MerchandiseClass::where('name','=',$row['cls_name'])->first();
+            //如果merchandise_class为空，则新建merchandise_class并获取新的对象
+            if(is_null($merchandise_class))
+            {
+                $merchandise_class = MerchandiseClass::create(
+                    array('name'=> $row['class_name'], 'detail'=>'System Auto Formed Merchandise Class!', 'create_uesr'=>$this->userId)
+                );
+            }
             $merchandise_class_id = $merchandise_class->id;
             //添加此商品到merchandise表中并获取商品id
             $merchandise = Merchandise::create(

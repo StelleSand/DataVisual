@@ -31,6 +31,6 @@ class Kernel extends ConsoleKernel
         $schedule->call(function(){
             //计划任务：每分钟执行InsertExcel
             Queue::push(new InsertExcel());
-        })->everyMinute()->withoutOverlapping();
+        })->everyMinute();
     }
 }

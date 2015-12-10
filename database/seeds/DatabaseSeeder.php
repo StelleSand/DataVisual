@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('User table seeded!');
 
 
-        $this->call('MerchandiseClassTableSeeder');
+        /*$this->call('MerchandiseClassTableSeeder');
 
-        $this->command->info('merchandise_class table seeded!');
+        $this->command->info('merchandise_class table seeded!');*/
 
         $this->call('ChannelTableSeeder');
 
@@ -75,5 +75,6 @@ class MerchandiseClassTableSeeder extends Seeder{
         MerchandiseClass::create( ['name'=>'小吃','create_user'=>1]);
         MerchandiseClass::create( ['name'=>'饮料','create_user'=>1]);
         MerchandiseClass::create( ['name'=>'蒸点','create_user'=>1]);
+        MerchandiseClass::create( ['name'=>'称重','create_user'=>1]);
     }
 }

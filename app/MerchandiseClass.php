@@ -15,7 +15,7 @@ class MerchandiseClass extends Model {
 
     protected $table = 'merchandise_class';
 
-    protected $fillable = ['name','detail','create_user','create_time'];
+    protected $fillable = ['name','detail','create_user'];
 
     public function merchandises()
     {
