@@ -16,7 +16,7 @@ class CreateOrderTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('order_no');
-            $table->integer('quantity');
+            $table->double('quantity');
             $table->double('price');
             $table->dateTime('create_date');
             $table->dateTime('print_date');
