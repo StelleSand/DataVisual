@@ -20,4 +20,9 @@ class Chart extends Model{
     {
         return $this->belongsTo('App\User','create_user','id');
     }
+
+    public function lines()
+    {
+        return $this->belongsToMany('App\Line','chart_line_match');
+    }
 }

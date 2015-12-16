@@ -8,17 +8,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Chart;
+use App\ChartLineMatch;
 use App\User;
 use App\Http\Controllers;
 use App\Merchandise;
 use Illuminate\Support\Facades\DB;
 use App\MerchandiseClass;
 use App\Channel;
+use Request;
 class ChartController extends Controller{
     protected $start_time;//起始时间
     protected $end_time;//结束时间
     protected $split_number;//图表取点个数
-    protected $timePoints;//计算得出的时间点数组
+    protected $timePoints = array();//计算得出的时间点数组
     protected $split_space;//计算得出的每两个时间点间隔
     protected $user_id;//预设使用制表的用户
     protected $user;//预设用户Model
@@ -33,21 +36,92 @@ class ChartController extends Controller{
     //设置channel_average_power数组，用以减少重复计算
     protected $channel_average_power = array();
 
+    //返回给前端的数据
+    protected $data = array();
 
     public function __construct()
     {
-        //初始化开始时间和结束时间
-        $this->start_time = mktime(0, 0, 0, 11, 8, 2015);
-        $this->end_time = mktime(0, 0, 0, 11, 9, 2015);
-        $this->split_number = 25;
-        $this->timePoints = array();
-        $result = $this->end_time - $this->start_time;
-        $this->split_space = $result / ($this->split_number-1);
         //初始化制表用户
         $this->user_id = 1;
         $this->user = User::find($this->user_id);
         //设置所有计算保留为小数点后两位
         $this->roundNumber = 2;
+        $this->data['user'] = $this->user;
+    }
+
+    public function getChart()
+    {
+        $charts = $this->user->charts()->get();
+        $this->data['charts'] = $charts;
+        return view('chartAdd',$this->data);
+    }
+
+    /*
+     * 添加一个chart
+     * */
+    public function postAddChart()
+    {
+        $inputs = Request::all();
+        $chartInfo = array('name' => $inputs['name'], 'create_user' => $this->user->id,'detail'=>$inputs['detail']);
+        Chart::create($chartInfo);
+        return view('chartAdd');
+    }
+
+    /*
+     * 删除指定chart
+     * */
+    public function getDeleteChart()
+    {
+        $chart = Chart::find(Request::input('id'));
+        if($chart->create_user == $this->user->id)
+            $chart->delete();
+        return view('chartAdd');
+    }
+
+
+    /*
+     * 为指定chart添加一条Line
+     * */
+    public function postChartAddLine()
+    {
+        $line = $this->user->lines()->find(Request::input('line_id'));
+        $chart = $this->user->charts()->find(Request::input('chart_id'));
+        if(is_null($line) || is_null($chart))
+        {
+            dump($line);
+            dump(chart);
+        }
+        $chartLineInfo = array('line_id' => $line->id, 'chart_id' => $chart->id);
+        ChartLineMatch::create($chartLineInfo);
+        return view('chartAddLine');
+    }
+
+    /*
+     * 为指定chart删除一条Line
+     * */
+    public function postChartDeleteLine()
+    {
+        $line = $this->user->lines()->find(Request::input('line_id'));
+        $chart = $this->user->charts()->find(Request::input('chart_id'));
+        if(is_null($line) || is_null($chart))
+        {
+            dump($line);
+            dump(chart);
+        }
+        $chartLine = ChartLineMatch::where('chart_id',$chart->id)->where('line_id',$line->id);
+        if(!is_null($chartLine))
+            $chartLine->delete();
+        return view('chartDeleteLine');
+    }
+
+    protected function init()
+    {
+        //初始化开始时间和结束时间
+        $this->start_time = mktime(0, 0, 0, 11, 8, 2015);
+        $this->end_time = mktime(0, 0, 0, 11, 9, 2015);
+        $this->split_number = 25;
+        $result = $this->end_time - $this->start_time;
+        $this->split_space = $result / ($this->split_number-1);
         //构建等间隔时间点数组
         //第一个点为开始点往前推算split_space时间间隔的点，用于计算第一个时间点的值,offset 为 -1
         //实际上timePoints数组有split_number + 1个点但是由于第一个点下标为-1,所以前端并不会使用，而会忽略这个下标为-1的点
@@ -175,6 +249,7 @@ class ChartController extends Controller{
 
     public function testDiagram()
     {
+        $this->init();
         $charts = array();
         array_push($charts,$this->makeChart1());
         array_push($charts,$this->makeChart2());

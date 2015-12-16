@@ -16,3 +16,22 @@ Route::get('/test', function () {
 });
 Route::get('/','ChartController@testDiagram');
 Route::get('import', 'ExcelImportController@importRecord');
+Route::get('unit', 'UnitController@getUnit');
+Route::post('addUnit', 'UnitController@postAddUnit');
+Route::get('deleteUnit', 'UnitController@getDeleteUnit');
+
+Route::get('line', 'LineController@getLine');
+Route::post('addLine', 'LineController@postAddLine');
+Route::get('deleteLine', 'LineController@getDeleteLine');
+
+Route::get('chart', 'ChartController@getChart');
+Route::post('addChart', 'ChartController@postAddChart');
+Route::post('deleteChart', 'ChartController@getDeleteChart');
+Route::get('chartAddLine', function(){
+    return view('chartAddLine');
+});
+Route::post('chartAddLine', 'ChartController@postChartAddLine');
+Route::get('chartDeleteLine', function(){
+    return view('chartDeleteLine');
+});
+Route::post('chartDeleteLine', 'ChartController@postChartDeleteLine');
