@@ -13,6 +13,7 @@ use App\ChartLineMatch;
 use App\User;
 use App\Http\Controllers;
 use App\Merchandise;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\MerchandiseClass;
 use App\Channel;
@@ -22,10 +23,12 @@ class ChartController extends Controller{
     protected $end_time;//结束时间
     protected $split_number;//图表取点个数
     protected $timePoints = array();//计算得出的时间点数组
+    protected $timePointsString = array();
     protected $split_space;//计算得出的每两个时间点间隔
     protected $user_id;//预设使用制表的用户
     protected $user;//预设用户Model
     protected $roundNumber;//本类计算结果保留位数
+    protected $timeZone = 'Asia/Shanghai';
 
 
     //设置sale_amount和sale_volume数组，用以减少重复计算
@@ -117,8 +120,10 @@ class ChartController extends Controller{
     protected function init()
     {
         //初始化开始时间和结束时间
-        $this->start_time = mktime(0, 0, 0, 11, 8, 2015);
-        $this->end_time = mktime(0, 0, 0, 11, 9, 2015);
+        $this->start_time = Carbon::now($this->timeZone)->addDay(-1)->timestamp;
+        $this->end_time = Carbon::now($this->timeZone)->timestamp;
+        //$this->start_time = Carbon::create(2015,12,15,20,40,0,$this->timeZone)->timestamp;
+        //$this->end_time = Carbon::create(2015,12,16,20,40,0,$this->timeZone)->timestamp;
         $this->split_number = 25;
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
@@ -134,13 +139,15 @@ class ChartController extends Controller{
         {
             $time_point += $this->split_space;
             //将中间点压入数组
-            array_push($this->timePoints,$time_point);
+            array_push($this->timePoints, $time_point);
+            array_push($this->timePointsString, $this->timeStampToString($time_point));
         }
     }
 
     protected function timeStampToString($time)
     {
-        return date('Y-m-d H:i:s',$time);
+        //return date('Y-m-d H:i:s',$time);
+        return Carbon::createFromTimestamp($time, $this->timeZone)->format('Y-m-d H:i:s');
     }
 
     /*
@@ -250,12 +257,22 @@ class ChartController extends Controller{
     public function testDiagram()
     {
         $this->init();
+
+/*        $charts = $this->user->charts()->get();
+        $chartsData = array();
+
+        foreach($charts as $chart)
+        {
+            $chartData = $this->makeChart($chart);
+            array_push($chartsData,$chartData);
+        }*/
+
         $charts = array();
         array_push($charts,$this->makeChart1());
         array_push($charts,$this->makeChart2());
-        array_push($charts,$this->makeChart3());
-        array_push($charts,$this->makeChart4());
-        foreach($charts as $chart_index => $chart)
+        //array_push($charts,$this->makeChart3());
+        //array_push($charts,$this->makeChart4());
+        /*foreach($charts as $chart_index => $chart)
         {
             foreach($chart as $point_index => $point)
             {
@@ -265,19 +282,30 @@ class ChartController extends Controller{
                         $charts[$chart_index][$point_index][$value_index] = round($value ,2);
                 }
             }
-        }
-        return view('test',['date'=>$charts]);
+        }*/
+        return view('charts',['charts'=>$charts]);
     }
+
+    /*
+     * chart制作函数，用以返回chart解析后的数据数组
+     * 参数为chart对象
+     * */
+    protected function makeChart(Chart $chart)
+    {
+        $lines = $chart->lines()->get();
+    }
+
     protected function makeChart1()
     {
         //初始化表chartPoints数组
         $chartPoints = array();
+        $chartNames = array('总用电功率','总销售额','总销量','总用电功率/总销售额');
         //设置allPower的channel_id为2
-        $allPowerChannelID = 2;
+        $allPowerChannelID = 1;
         $allPowerPoints = $this->getPowerAverageValue($allPowerChannelID);
-        $allSaleAmount = $this->getAllMerchandiseClassSaleAmount();
-        $allSaleVolume = $this->getAllMerchandiseClassSaleVolume();
-        for($i = 0;$i < $this->split_number; $i++) {
+        $allSaleAmountPoints = $this->getAllMerchandiseClassSaleAmount();
+        $allSaleVolumePoints = $this->getAllMerchandiseClassSaleVolume();
+        /*for($i = 0;$i < $this->split_number; $i++) {
             //设置period字段
             $chartPoint = array();
             $chartPoint['period'] = $this->timeStampToString($this->timePoints[$i]);
@@ -287,7 +315,21 @@ class ChartController extends Controller{
             $chartPoint['allPowerDivideByAllSaleAmount'] = $chartPoint['allSaleAmount'] == 0 ? 0 : $chartPoint['allPower'] / $chartPoint['allSaleAmount'];
             //将计算后的点加入到chartPoints中;
             array_push($chartPoints,$chartPoint);
+        }*/
+        $allPowerDivideByAllSaleAmount  = array();
+        for($i = 0; $i < $this->split_number; $i++)
+        {
+            $allPowerDivideByAllSaleAmount[$i] = $allSaleAmountPoints[$i] == 0 ? 0 : $allPowerPoints[$i] / $allSaleAmountPoints[$i];
         }
+        $chartPoints['chartName'] = '1';
+        $chartPoints['names'] = $chartNames;
+        $chartPoints['xpoints'] = $this->timePointsString;
+        $chartPoints['ypoints'] = array();
+        $chartPoints['ypoints'][0] = $allPowerPoints;
+        $chartPoints['ypoints'][1] = $allSaleAmountPoints;
+        $chartPoints['ypoints'][2] = $allSaleVolumePoints;
+        $chartPoints['ypoints'][3] = $allPowerDivideByAllSaleAmount;
+
         return $chartPoints;
     }
 
@@ -296,13 +338,15 @@ class ChartController extends Controller{
         //初始化表chartPoints数组
         $chartPoints = array();
         //设置面炉的channel_id为3,保温台channel_id为10
-        $mianluChannelID = 3;
+        $chartNames = array('面炉用电功率','保温台用电功率','面类销售量','面类用电功率/面类销售额');
+        $mianluChannelID = 2;
         $mianluPowerPoints = $this->getPowerAverageValue($mianluChannelID);
-        $baowentaiChannelID = 10;
+        $baowentaiChannelID = 9;
         $baowentaiPowerPoints = $this->getPowerAverageValue($baowentaiChannelID);
         //面类merchandise_class_id为4
-        $mianleiMerchandiseClassID = 4;
+        $mianleiMerchandiseClassID = 3;
         $mianleiSaleVolumePoints = $this->getMerchandiseClassSalesVolume($mianleiMerchandiseClassID);
+        /*
         for($i = 0;$i < $this->split_number; $i++) {
             //设置period字段
             $chartPoint = array();
@@ -313,7 +357,20 @@ class ChartController extends Controller{
             $chartPoint['mianleiPowerDivideBySaleAmount'] = $chartPoint['mianleiSaleVolume'] == 0 ? 0 : $chartPoint['mianluPower'] / $chartPoint['mianleiSaleVolume'];
             //将计算后的点加入到chartPoints中;
             array_push($chartPoints,$chartPoint);
+        }*/
+        $mianleiPowerDivideBySaleAmount  = array();
+        for($i = 0; $i < $this->split_number; $i++)
+        {
+            $mianleiPowerDivideBySaleAmount[$i] = $mianleiSaleVolumePoints[$i] == 0 ? 0 : $mianluPowerPoints[$i] / $mianleiSaleVolumePoints[$i];
         }
+        $chartPoints['chartName'] = '2';
+        $chartPoints['names'] = $chartNames;
+        $chartPoints['xpoints'] = $this->timePointsString;
+        $chartPoints['ypoints'] = array();
+        $chartPoints['ypoints'][0] = $mianluPowerPoints;
+        $chartPoints['ypoints'][1] = $baowentaiPowerPoints;
+        $chartPoints['ypoints'][2] = $mianleiSaleVolumePoints;
+        $chartPoints['ypoints'][3] = $mianleiPowerDivideBySaleAmount;
         return $chartPoints;
     }
 
@@ -325,13 +382,13 @@ class ChartController extends Controller{
         //麻辣烫cladd_id为3,面类为4，小吃为5，饮料为6，蒸点merchandise_class_id为7
         $malatangMerchandiseClassID = 3;
         $malatangSaleAmountPoints = $this->getMerchandiseClassSalesAmount($malatangMerchandiseClassID);
-        $mianleiMerchandiseClassID = 4;
+        $mianleiMerchandiseClassID = 1;
         $mianleiSaleAmountPoints = $this->getMerchandiseClassSalesAmount($mianleiMerchandiseClassID);
         $xiaochiMerchandiseClassID = 5;
         $xiaochiSaleAmountPoints = $this->getMerchandiseClassSalesAmount($xiaochiMerchandiseClassID);
-        $yinliaoMerchandiseClassID = 6;
+        $yinliaoMerchandiseClassID = 4;
         $yinliaoSaleAmountPoints = $this->getMerchandiseClassSalesAmount($yinliaoMerchandiseClassID);
-        $zhengdianMerchandiseClassID = 7;
+        $zhengdianMerchandiseClassID = 6;
         $zhengdianSaleAmountPoints = $this->getMerchandiseClassSalesAmount($zhengdianMerchandiseClassID);
         $allSaleAmountPoints = $this->getAllMerchandiseClassSaleAmount();
         for($i = 0;$i < $this->split_number; $i++) {
@@ -355,25 +412,25 @@ class ChartController extends Controller{
         //初始化表chartPoints数组
         $chartPoints = array();
         //设置各个channel_id
-        $allPowerChannelID = 2;
+        $allPowerChannelID = 1;
         $allPowerPoints = $this->getPowerAverageValue($allPowerChannelID);
-        $mianluChannelID = 3;
+        $mianluChannelID = 2;
         $mianluPowerPoints = $this->getPowerAverageValue($mianluChannelID);
-        $sangeluziChannelID = 4;
+        $sangeluziChannelID = 3;
         $sangeluziPowerPoints = $this->getPowerAverageValue($sangeluziChannelID);
-        $kaishuluChannelID = 5;
+        $kaishuluChannelID = 4;
         $kaishuiluPowerPoints = $this->getPowerAverageValue($kaishuluChannelID);
-        $paifengshanChannelID = 6;
+        $paifengshanChannelID = 5;
         $paifengshanPowerPoints = $this->getPowerAverageValue($paifengshanChannelID);
-        $sangebingxiangChannelID = 7;
+        $sangebingxiangChannelID = 6;
         $sangebingxiangPowerPoints = $this->getPowerAverageValue($sangebingxiangChannelID);
-        $zhanguibingxiangChannelID = 8;
+        $zhanguibingxiangChannelID = 7;
         $zhanguibingxiangPowerPoints = $this->getPowerAverageValue($zhanguibingxiangChannelID);
-        $zhengbaoluChannelID = 9;
+        $zhengbaoluChannelID = 8;
         $zhengbaoluPowerPoints = $this->getPowerAverageValue($zhengbaoluChannelID);
-        $baowentaiChannelID = 10;
+        $baowentaiChannelID = 9;
         $baowentaiPowerPoints = $this->getPowerAverageValue($baowentaiChannelID);
-        $kelechazuoChannelID =11;
+        $kelechazuoChannelID =10;
         $kelechazuoPowerPoints = $this->getPowerAverageValue($kelechazuoChannelID);
         for($i = 0;$i < $this->split_number; $i++) {
             //设置period字段
