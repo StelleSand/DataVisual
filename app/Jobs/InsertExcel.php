@@ -114,6 +114,10 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
 
     public function mvFile($filePath, $toPath)
     {
+        if (Storage::exists($toPath))
+        {
+            Storage::delete($toPath);
+        }
         Storage::move($filePath, $toPath);
     }
     //导入电量数据—此处同时兼任导入温度数据
@@ -130,7 +134,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
             });
         });
         //扫描结束后移动文件
-        $this->mvFile($this->powerFileName, $this->powerBackupStoragePath.'/'.$this->powerFileOriginName);
+        $toFilePath = $this->powerBackupStoragePath.'/'.$this->powerFileOriginName;
+        $this->mvFile($this->powerFileName, $toFilePath);
         //完成文件扫描后，用最近插入时间更新缓存中最近插入行
         $this->cachePowerLastInsertRow = $this->powerLastInsertRow;
         $expiresAt = Carbon::now()->addDay();
