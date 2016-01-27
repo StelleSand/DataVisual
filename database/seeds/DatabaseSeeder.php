@@ -56,7 +56,7 @@ class ChannelTableSeeder extends Seeder {
         Channel::create(['name'=>'面炉','channel_number'=>2,'receiver_id'=>'100313','create_user'=>1]);
         Channel::create(['name'=>'三个炉子','channel_number'=>3,'receiver_id'=>'100313','create_user'=>1]);
         Channel::create(['name'=>'开水炉','channel_number'=>4,'receiver_id'=>'100313','create_user'=>1]);
-        Channel::create(['name'=>'排风扇/烟机','channel_number'=>5,'receiver_id'=>'100313','create_user'=>1]);
+        Channel::create(['name'=>'排气扇/烟机','channel_number'=>5,'receiver_id'=>'100313','create_user'=>1]);
         Channel::create(['name'=>'三个冰箱','channel_number'=>6,'receiver_id'=>'100313','create_user'=>1]);
         Channel::create(['name'=>'展示柜冰箱','channel_number'=>7,'receiver_id'=>'100313','create_user'=>1]);
         Channel::create(['name'=>'蒸包炉','channel_number'=>8,'receiver_id'=>'100313','create_user'=>1]);
