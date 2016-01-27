@@ -30,9 +30,12 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
     protected $orderRecordRepeatCheck = true;
     protected $orderFileNames;
     protected $powerFileName;
+    protected $powerFileOriginName;
     protected $excelRoot;
     protected $orderStoragePath;
     protected $powerStoragePath;
+    protected $orderBackupStoragePath;
+    protected $powerBackupStoragePath;
     protected $userId;
     protected $userChannels;
     protected $deleteSourceFile;
@@ -65,6 +68,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         //设置storagePath,用于Storage加载
         $this->orderStoragePath = 'order/'.$this->userId.'/';
         $this->powerStoragePath = 'power/'.$this->userId.'/';
+        $this->orderBackupStoragePath = 'order/used';
+        $this->powerBackupStoragePath = 'power/used';
         //设置要处理的order相关文件
         $this->orderFileNames = Storage::allFiles($this->orderStoragePath);
         //设置抓取power数据相关信息
@@ -107,6 +112,10 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         $this->importPowerRecord();
     }
 
+    public function mvFile($filePath, $toPath)
+    {
+        Storage::move($filePath, $toPath);
+    }
     //导入电量数据—此处同时兼任导入温度数据
     public function importPowerRecord()
     {
@@ -120,6 +129,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
                 $this->powerRecordInsert($row);
             });
         });
+        //扫描结束后移动文件
+        $this->mvFile($this->powerFileName, $this->powerBackupStoragePath.$this->powerFileOriginName);
         //完成文件扫描后，用最近插入时间更新缓存中最近插入行
         $this->cachePowerLastInsertRow = $this->powerLastInsertRow;
         $expiresAt = Carbon::now()->addDay();
@@ -152,6 +163,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
             //如果设置为不保留源文件，运行完成后删除源文件
             if($this->deleteSourceFile)
                 Storage::delete($orderFileName);
+            else
+                $this->mvFile($orderFileName, $this->orderBackupStoragePath.substr($orderFileName, strlen($this->orderStoragePath)));
         }
     }
     //插入一条Order
@@ -336,6 +349,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         //文件内容则直接为bodyString
         $file_content = $bodyString;
         //设置powerFileName
+        $this->powerFileOriginName = $file_name;
         $this->powerFileName = $this->powerStoragePath.$file_name;
         //将获取结果写入本地文件
         Storage::put($this->powerFileName, $file_content);
