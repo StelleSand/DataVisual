@@ -57,7 +57,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
      *
      * @return void
      */
-    public function __construct($userId = 1, $deleteSourceFile = true)
+    public function __construct($userId = 1, $deleteSourceFile = false)
     {
         //测试userId 设为1
         $this->userId = $userId;
