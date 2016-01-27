@@ -166,10 +166,10 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
                 });
             });
             //如果设置为不保留源文件，运行完成后删除源文件
-            if($this->deleteSourceFile)
+            /*if($this->deleteSourceFile)
                 Storage::delete($orderFileName);
-            else
-                $this->mvFile($orderFileName, $this->orderBackupStoragePath.'/'.substr($orderFileName, strlen($this->orderStoragePath)));
+            else*/
+            $this->mvFile($orderFileName, $this->orderBackupStoragePath.'/'.substr($orderFileName, strlen($this->orderStoragePath)));
         }
     }
     //插入一条Order
