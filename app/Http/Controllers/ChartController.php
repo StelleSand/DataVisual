@@ -139,8 +139,22 @@ class ChartController extends Controller{
     protected function init()
     {
         //初始化开始时间和结束时间
-        $this->start_time = Carbon::now($this->timeZone)->addDay(-1)->timestamp;
-        $this->end_time = Carbon::now($this->timeZone)->timestamp;
+        if(Request::has('date'))
+        {
+            $date = Request::input('date');
+            if(Request::has('time'))
+            {
+                $time = ' '.Request::input('time');
+            }
+            else
+            $time = ' 00:00:00';
+            $this->start_time = Carbon::createFromFormat('Y-m-d H:i:s', $date.$time, $this->timeZone)->addDay(-1)->timestamp;
+            $this->end_time = Carbon::createFromFormat('Y-m-d H:i:s', $date.$time, $this->timeZone)->timestamp;
+        }
+        else {
+            $this->start_time = Carbon::now($this->timeZone)->addDay(-1)->timestamp;
+            $this->end_time = Carbon::now($this->timeZone)->timestamp;
+        }
         //$this->start_time = Carbon::create(2015,12,15,20,40,0,$this->timeZone)->timestamp;
         //$this->end_time = Carbon::create(2015,12,16,20,40,0,$this->timeZone)->timestamp;
         $this->split_number = 25;
