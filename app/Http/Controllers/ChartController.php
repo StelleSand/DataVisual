@@ -310,46 +310,35 @@ class ChartController extends Controller{
     // 返回数组都乘以一个常数后的结果
     protected function arrayMulNumber($array, $number)
     {
-    $result = array();
-    for ($i = 0; $i < $this->split_number; $i++)
-    {
-        $result[$i] = $array[$i] * $number;
+        $result = array();
+        for ($i = 0; $i < $this->split_number; $i++)
+        {
+            $result[$i] = $array[$i] * $number;
+        }
+        return $result;
     }
-    return $result;
-}
 
-    public function testDiagram()
+    public function ajaxTestDiagram()
     {
         $this->init();
-
-/*        $charts = $this->user->charts()->get();
-        $chartsData = array();
-
-        foreach($charts as $chart)
-        {
-            $chartData = $this->makeChart($chart);
-            array_push($chartsData,$chartData);
-        }*/
-
         $charts = array();
         array_push($charts,$this->makeChart1());
         array_push($charts,$this->makeChart2());
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        //array_push($charts,$this->makeChart3());
-        //array_push($charts,$this->makeChart4());
-        /*foreach($charts as $chart_index => $chart)
-        {
-            foreach($chart as $point_index => $point)
-            {
-                foreach($point as $value_index => $value)
-                {
-                    if(is_numeric($value))
-                        $charts[$chart_index][$point_index][$value_index] = round($value ,2);
-                }
-            }
-        }*/
+        return json_encode(['charts'=>$charts]);
+    }
+
+    public function testDiagram()
+    {
+        $this->init();
+        $charts = array();
+        array_push($charts,$this->makeChart1());
+        array_push($charts,$this->makeChart2());
+        array_push($charts,$this->makeChart3());
+        array_push($charts,$this->makeChart4());
+        array_push($charts,$this->makeChart5());
         return view('charts',['charts'=>$charts]);
     }
 

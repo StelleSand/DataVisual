@@ -9,6 +9,7 @@ $(function(){
         showAjaxError(event['type'],request['status'],request['statusText'],request['responseText']);
     });
     //为全局ajaxError事件注册消息提示框
+
 });
 //生成一个表单提交按钮，参数分别为 按钮文字、按钮blockclass、SizeClass、目标表单名字、按钮点击回调函数、ajax提交成功处理回调函数
 function getFormBtn(btnText,btnColor,btnBlock,btnSize,targetFormName,btnClickFunc,dataProcessFunc)

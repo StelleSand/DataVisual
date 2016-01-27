@@ -15,6 +15,7 @@ Route::get('/test', function () {
     return view('welcome');
 });
 Route::get('/','ChartController@testDiagram');
+Route::post('realtime', 'ChartController@ajaxTestDiagram');
 Route::get('import', 'ExcelImportController@importRecord');
 Route::get('unit', 'UnitController@getUnit');
 Route::post('addUnit', 'UnitController@postAddUnit');
