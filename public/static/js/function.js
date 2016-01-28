@@ -102,6 +102,3 @@ function configChart(chartData)
         }
     );*/
 }
-function setChartHeight(chartDiv)
-{
-}

@@ -2,8 +2,10 @@
 <div id="{{ $chartName }}"></div>
 <script type="text/javascript">
     var clientWidth = document.body.clientWidth;
-    var height = (Math.round(clientWidth * 0.30674847)).toString() + 'px';
-    $("#{{ $chartName }}").css('height',height);
+    var height = Math.round(clientWidth * 0.30674847);
+    if (height < 250)
+        height = 250;
+    $("#{{ $chartName }}").css('height',height.toString() + 'px');
     // 使用
     require(
             [
