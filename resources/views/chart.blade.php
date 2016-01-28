@@ -78,14 +78,14 @@
                             <th></th>
                             @for($i = 0; $i < count($names); $i ++)
                             <th>
-                                {{ $names[$i] }}
+                                {{ substr($names[$i],0, strpos($names[$i], '(')) }}
                             </th>
                             @endfor
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>最新值</td>
+                            <td>现在</td>
                             @for($i = 0; $i < count($names); $i ++)
                             <td>
                                 {{ $ypoints[$i][count($ypoints[$i]) - 1] }}
@@ -93,7 +93,7 @@
                             @endfor
                         </tr>
                         <tr>
-                            <td>累计值</td>
+                            <td>累计</td>
                             @for($i = 0; $i < count($names); $i ++)
                             <td>
                                 <?php $result = 0;?>
