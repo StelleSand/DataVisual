@@ -18,7 +18,7 @@
                 <form id="chartInfo" method="get" action="/" class="navbar-form navbar-left" role="attachedInfo">
                     <!--<input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">-->
                     <div class="form-group">
-                        <input name="datetime" id="datetimepicker" type="datetime" class="form-control" placeholder="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii:ss">
+                        <input name="datetime" id="datetimepicker" type="datetime" class="form-control" placeholder="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii">
                         <div class="input-group">
                             <input id="hours" name="hours" type="number" min="0.5" step="0.5" class="form-control" value="{{ $hours }}" placeholder="{{ $hours }}">
                             <span class="input-group-addon">Hours</span>

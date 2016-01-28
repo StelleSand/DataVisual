@@ -52,7 +52,6 @@ function configChart(chartData)
         series : lines
     };
 
-    console.log(globalCharts);
     var myChart = globalCharts[chartData['chartName']];
     myChart.setOption(option);
     // 使用

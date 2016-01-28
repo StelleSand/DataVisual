@@ -149,20 +149,24 @@ class ChartController extends Controller{
             }
             else
             $time = ' 00:00:00';
-            $this->start_time = Carbon::createFromFormat('Y-m-d H:i:s', $date.$time, $this->timeZone)->addDay(-1)->timestamp;
-            $this->end_time = Carbon::createFromFormat('Y-m-d H:i:s', $date.$time, $this->timeZone)->timestamp;
+            $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $date.$time, $this->timeZone)->addDay(-1)->timestamp;
+            $this->end_time = Carbon::createFromFormat('Y-m-d H:i', $date.$time, $this->timeZone)->timestamp;
         }
         if(Request::has('hours') && !empty(Request::input('hours')))
             $this->hours = Request::input('hours');
         else
             $this->hours = 24;
         if(Request::has('datetime') && !empty(Request::input('datetime'))) {
-            $this->end_time = Carbon::createFromFormat('Y-m-d H:i:s', Request::input('datetime'), $this->timeZone)->timestamp;
-            $this->start_time = Carbon::createFromFormat('Y-m-d H:i:s', Request::input('datetime'), $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
+            $this->end_time = Carbon::createFromFormat('Y-m-d H:i', Request::input('datetime'), $this->timeZone)->timestamp;
+            $this->start_time = Carbon::createFromFormat('Y-m-d H:i', Request::input('datetime'), $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
         }
         else {
-            $this->start_time = Carbon::now($this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
-            $this->end_time = Carbon::now($this->timeZone)->timestamp;
+            $this->start_time = Carbon::now($this->timeZone)->addMinutes( -60 * $this->hours);
+            $this->start_time->second = 0;
+            $this->start_time = $this->start_time->timestamp;
+            $this->end_time = Carbon::now($this->timeZone);
+            $this->end_time->second = 0;
+            $this->end_time = $this->end_time->timestamp;
         }
         //$this->start_time = Carbon::create(2015,12,15,20,40,0,$this->timeZone)->timestamp;
         //$this->end_time = Carbon::create(2015,12,16,20,40,0,$this->timeZone)->timestamp;
@@ -189,7 +193,7 @@ class ChartController extends Controller{
     protected function timeStampToString($time)
     {
         //return date('Y-m-d H:i:s',$time);
-        return Carbon::createFromTimestamp($time, $this->timeZone)->format('Y-m-d H:i:s');
+        return Carbon::createFromTimestamp($time, $this->timeZone)->format('Y-m-d H:i');
     }
 
     /*
