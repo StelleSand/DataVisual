@@ -196,7 +196,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
             $merchandise_id = $merchandise->id;
             //检测订单是否已存在，防止重复插入
             //如果要求不查重,则直接跳过查重函数。
-            if($this->orderRecordRepeatCheck && $this->orderExist($merchandise_id, $row['account_no'], $row['sendprint_date']->toDateTimeString()))
+            if($this->orderRecordRepeatCheck && $this->orderExist($merchandise_id, $row['account_no'], $row['sendprint_date']->toDateTimeString(), $row['create_date']->toDateTimeString(), $row['sub_qty']))
                 return ;
         }
         //根据商品id插入order
@@ -208,9 +208,9 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         //添加商品购买记录
     }
     //检测指定商品id和时间的订单是否存在——基于同一时间同一商品同一订单号只能存在一个
-    public function orderExist($merchandise_id,$order_no,$print_date)
+    public function orderExist($merchandise_id,$order_no,$print_date, $create_date, $quantity)
     {
-        $order = Orders::where('merchandise_id','=',$merchandise_id)->where('order_no','=',$order_no)->where('print_date','=',$print_date)->first();
+        $order = Orders::where('merchandise_id','=',$merchandise_id)->where('order_no','=',$order_no)->where('print_date','=',$print_date)->first()->where('create_date', '=', $create_date)->where('quantity','=',$quantity);
         return !is_null($order);
     }
 

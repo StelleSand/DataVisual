@@ -3,8 +3,8 @@
 <script type="text/javascript">
     var clientWidth = document.body.clientWidth;
     var height = Math.round(clientWidth * 0.30674847);
-    if (height < 250)
-        height = 250;
+    if (height < 350)
+        height = 350;
     $("#{{ $chartName }}").css('height',height.toString() + 'px');
     // 使用
     require(
