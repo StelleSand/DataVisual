@@ -161,16 +161,21 @@ class ChartController extends Controller{
             $this->start_time = Carbon::createFromFormat('Y-m-d H:i', Request::input('datetime'), $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
         }
         else {
-            $this->start_time = Carbon::now($this->timeZone)->addMinutes( -60 * $this->hours);
-            $this->start_time->second = 0;
-            $this->start_time = $this->start_time->timestamp;
             $this->end_time = Carbon::now($this->timeZone);
             $this->end_time->second = 0;
+            $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
+            $this->end_time->addMinutes( -15 );
+            $this->start_time = $this->end_time;
             $this->end_time = $this->end_time->timestamp;
+            $this->start_time->addMinutes( -60 * $this->hours );
+            $this->start_time = $this->start_time->timestamp;
         }
         //$this->start_time = Carbon::create(2015,12,15,20,40,0,$this->timeZone)->timestamp;
         //$this->end_time = Carbon::create(2015,12,16,20,40,0,$this->timeZone)->timestamp;
-        $this->split_number = 25;
+        if(Request::has('split') && !empty(Request::input('split')) )
+            $this->split_number = Request::input('split');
+        else
+            $this->split_number = 25;
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
         //构建等间隔时间点数组
@@ -340,7 +345,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return json_encode(['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours]);
+        return json_encode(['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours, 'split' => $this->split_number]);
     }
 
     public function testDiagram()
@@ -352,7 +357,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return view('charts',['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours]);
+        return view('charts',['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours, 'split' => $this->split_number]);
     }
 
     /*
@@ -452,7 +457,7 @@ class ChartController extends Controller{
     {
         //初始化表chartPoints数组
         $chartPoints = array();
-        $chartNames = array('总销售额(元)','麻辣烫销售额(元)','面类销售额(元)','蒸点销售额','小吃销售额','饮料销售额');
+        $chartNames = array('总销售额(元)','麻辣烫销售额(元)','面类销售额(元)','蒸点销售额(元)','小吃销售额(元)','饮料销售额(元)');
         $allSaleAmount = $this->getAllMerchandiseClassSaleAmount();
         $malatangSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_malatangID);
         $mianleiSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_mianleiID);

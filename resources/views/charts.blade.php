@@ -23,6 +23,10 @@
                             <input id="hours" name="hours" type="number" min="0.5" step="0.5" class="form-control" value="{{ $hours }}" placeholder="{{ $hours }}">
                             <span class="input-group-addon">Hours</span>
                         </div>
+                        <div class="input-group">
+                            <input id="split" name="split" type="number" min="5" step="1" max="25" class="form-control" value="{{ $split }}" placeholder="{{ $split }}">
+                            <span class="input-group-addon">Points</span>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-default navbar-btn">View</button>
                 </form>

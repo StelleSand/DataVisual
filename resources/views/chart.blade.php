@@ -68,3 +68,45 @@
             }
     );
 </script>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 col-md-12 ool-sm-12 col-xs-12">
+            <div class="table-responsive">
+                <table class="table table-striped .table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @for($i = 0; $i < count($names); $i ++)
+                            <th>
+                                {{ $names[$i] }}
+                            </th>
+                            @endfor
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>最新值</td>
+                            @for($i = 0; $i < count($names); $i ++)
+                            <td>
+                                {{ $ypoints[$i][count($ypoints) - 1] }}
+                            </td>
+                            @endfor
+                        </tr>
+                        <tr>
+                            <td>累计值</td>
+                            @for($i = 0; $i < count($names); $i ++)
+                            <td>
+                                <?php $result = 0;?>
+                                @foreach($ypoints[$i] as $ypoint)
+                                    <?php $result += $ypoint; ?>
+                                @endforeach
+                                {{ $result }}
+                            </td>
+                            @endfor
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

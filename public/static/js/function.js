@@ -21,7 +21,8 @@ function realtimeToggle(button)
 function ajaxCharts()
 {
     var addr = 'realtime';
-    var data = {'hours':$('#hours').attr('placeholder')};
+    var data = {'hours':2, 'split':25};
+    //var data = {};
     var recallfunc = updateCharts;
     ajaxData(addr, data, recallfunc);
 }
@@ -45,7 +46,7 @@ function configChart(chartData)
         line['data'] = chartData['ypoints'][i];
         lines.push(line);
     }
-    option = {
+    var option = {
         xAxis: {
             data : chartData['xpoints']
         },
@@ -53,6 +54,7 @@ function configChart(chartData)
     };
 
     var myChart = globalCharts[chartData['chartName']];
+    console.log(option);
     myChart.setOption(option);
     // 使用
     /*require(
