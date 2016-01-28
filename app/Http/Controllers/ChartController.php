@@ -21,6 +21,7 @@ use Request;
 class ChartController extends Controller{
     protected $start_time;//起始时间
     protected $end_time;//结束时间
+    protected $hours;//跨度时长
     protected $split_number;//图表取点个数
     protected $timePoints = array();//计算得出的时间点数组
     protected $timePointsString = array();
@@ -139,7 +140,7 @@ class ChartController extends Controller{
     protected function init()
     {
         //初始化开始时间和结束时间
-        if(Request::has('date'))
+        if(Request::has('date') && !empty(Request::input('date')))
         {
             $date = Request::input('date');
             if(Request::has('time'))
@@ -151,8 +152,16 @@ class ChartController extends Controller{
             $this->start_time = Carbon::createFromFormat('Y-m-d H:i:s', $date.$time, $this->timeZone)->addDay(-1)->timestamp;
             $this->end_time = Carbon::createFromFormat('Y-m-d H:i:s', $date.$time, $this->timeZone)->timestamp;
         }
+        if(Request::has('hours') && !empty(Request::input('hours')))
+            $this->hours = Request::input('hours');
+        else
+            $this->hours = 24;
+        if(Request::has('datetime') && !empty(Request::input('datetime'))) {
+            $this->end_time = Carbon::createFromFormat('Y-m-d H:i:s', Request::input('datetime'), $this->timeZone)->timestamp;
+            $this->start_time = Carbon::createFromFormat('Y-m-d H:i:s', Request::input('datetime'), $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
+        }
         else {
-            $this->start_time = Carbon::now($this->timeZone)->addDay(-1)->timestamp;
+            $this->start_time = Carbon::now($this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
             $this->end_time = Carbon::now($this->timeZone)->timestamp;
         }
         //$this->start_time = Carbon::create(2015,12,15,20,40,0,$this->timeZone)->timestamp;
@@ -327,7 +336,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return json_encode(['charts'=>$charts]);
+        return json_encode(['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours]);
     }
 
     public function testDiagram()
@@ -339,7 +348,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return view('charts',['charts'=>$charts]);
+        return view('charts',['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours]);
     }
 
     /*

@@ -21,7 +21,7 @@ function realtimeToggle(button)
 function ajaxCharts()
 {
     var addr = 'realtime';
-    var data = {};
+    var data = {'hours':$('#hours').attr('placeholder')};
     var recallfunc = updateCharts;
     ajaxData(addr, data, recallfunc);
 }
@@ -39,14 +39,24 @@ function configChart(chartData)
     {
         var line = {};
         line['name'] = chartData['names'][i];
-        line['type'] = 'line';
-        line['stack'] = '总量';
-        line['itemStyle'] = {normal: {areaStyle: {type: 'default'}}};
+        //line['type'] = 'line';
+        //line['stack'] = '总量';
+        //line['itemStyle'] = {normal: {areaStyle: {type: 'default'}}};
         line['data'] = chartData['ypoints'][i];
         lines.push(line);
     }
+    option = {
+        xAxis: {
+            data : chartData['xpoints']
+        },
+        series : lines
+    };
+
+    console.log(globalCharts);
+    var myChart = globalCharts[chartData['chartName']];
+    myChart.setOption(option);
     // 使用
-    require(
+    /*require(
         [
             'echarts',
             'echarts/chart/line',
@@ -91,5 +101,5 @@ function configChart(chartData)
             // 为echarts对象加载数据
             myChart.setOption(option);
         }
-    );
+    );*/
 }

@@ -6,11 +6,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>烫烫记庄胜崇光百货 | 功耗浏览</title>
     <link href="static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
     <!-- ECharts单文件引入 -->
     <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
     <script src="static/js/jquery.min.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
     <script src="static/js/header.js"></script>
     <script src="static/js/function.js"></script>
+    <script src="static/js/bootstrap-datetimepicker.min.js"></script>
 </head>
 <body>

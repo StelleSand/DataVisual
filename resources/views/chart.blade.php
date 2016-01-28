@@ -1,6 +1,7 @@
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
 <div id="{{ $chartName }}" style="height:400px"></div>
 <script type="text/javascript">
+    var globalCharts = {};
     // 使用
     require(
             [
@@ -59,6 +60,7 @@
 
                 // 为echarts对象加载数据
                 myChart.setOption(option);
+                globalCharts['{{ $chartName }}'] = myChart;
             }
     );
 </script>

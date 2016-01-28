@@ -176,7 +176,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
     public function orderInsert($row)
     {
         //查询商品是否存在
-        if(is_null($row['item_name']) || isEmpty($row['item_name']) || is_null($row['cls_name']) || isEmpty($row['cls_name']))
+        if(is_null($row['item_name']) || empty($row['item_name']) || is_null($row['cls_name']) || empty($row['cls_name']))
             return;
         $merchandise = Merchandise::where('name','=',$row['item_name'])->first();
         //如果商品查询失败，则商品不存在，检验创建新商品条目
