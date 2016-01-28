@@ -1,7 +1,9 @@
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-<div id="{{ $chartName }}" style="height:400px"></div>
+<div id="{{ $chartName }}"></div>
 <script type="text/javascript">
-    var globalCharts = {};
+    var clientWidth = document.body.clientWidth;
+    var height = (Math.round(clientWidth * 0.30674847)).toString() + 'px';
+    $("#{{ $chartName }}").css('height',height);
     // 使用
     require(
             [

@@ -41,6 +41,7 @@
             echarts: 'http://echarts.baidu.com/build/dist'
         }
     });
+    var globalCharts = {};
 </script>
 @foreach($charts as $chart)
     @include('chart',$chart)
