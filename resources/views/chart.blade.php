@@ -88,7 +88,7 @@
                             <td>最新值</td>
                             @for($i = 0; $i < count($names); $i ++)
                             <td>
-                                {{ $ypoints[$i][count($ypoints) - 1] }}
+                                {{ $ypoints[$i][count($ypoints[$i]) - 1] }}
                             </td>
                             @endfor
                         </tr>
