@@ -11,6 +11,9 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Order;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Helper\Table;
+
 class Merchandise extends Model {
 
     protected $table = 'merchandise';
@@ -36,7 +39,8 @@ class Merchandise extends Model {
     public function getCumulativeSaleAmount($timeStringLow,$timeStringHigh )
     {
         //选取对应时间段数据,目前设置为选取print_date,此字段可调整
-        $orders = $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->get();
+        //$orders = $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->get();
+        $orders = $this->orders()->where('print_date','>', $timeStringLow)->where('print_date','<=',$timeStringHigh)->get();
         $SaleAmount = 0;
         //获取对应时间点附近数据和
         foreach($orders as $order)

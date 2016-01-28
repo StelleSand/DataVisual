@@ -108,7 +108,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        $this->importPowerRecord();
+        //$this->importPowerRecord();
         $this->importOrderRecord();
     }
 
@@ -210,7 +210,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
     //检测指定商品id和时间的订单是否存在——基于同一时间同一商品同一订单号只能存在一个
     public function orderExist($merchandise_id,$order_no,$print_date, $create_date, $quantity)
     {
-        $order = Orders::where('merchandise_id','=',$merchandise_id)->where('order_no','=',$order_no)->where('print_date','=',$print_date)->first()->where('create_date', '=', $create_date)->where('quantity','=',$quantity);
+        $order = Orders::where('merchandise_id','=',$merchandise_id)->where('order_no','=',$order_no)->where('print_date','=',$print_date)->where('create_date', '=', $create_date)->where('quantity','=',$quantity)->first();
         return !is_null($order);
     }
 
