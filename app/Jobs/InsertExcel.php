@@ -108,7 +108,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        //$this->importPowerRecord();
+        $this->importPowerRecord();
         $this->importOrderRecord();
     }
 
