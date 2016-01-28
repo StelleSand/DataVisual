@@ -52,6 +52,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
     protected $powerLastInsertRow;
     protected $powerAdditionalInsertBoundMinute;
     protected $powerAdditionalInsertInvalidMinute;
+    protected $hadInsertedOrders = false;
     /**
      * Create a new job instance.
      *
@@ -107,9 +108,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
      */
     public function handle()
     {
-        //
-        $this->importOrderRecord();
         $this->importPowerRecord();
+        $this->importOrderRecord();
     }
 
     public function mvFile($filePath, $toPath)
@@ -165,18 +165,19 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
                     });
                 });
             });
-            //如果设置为不保留源文件，运行完成后删除源文件
-            /*if($this->deleteSourceFile)
+            //如果设置为不保留源文件，运行完成后删除源文件;如果没有过插入记录，即为空文件，删除
+            if($this->deleteSourceFile || !$this->hadInsertedOrders)
                 Storage::delete($orderFileName);
-            else*/
-            $this->mvFile($orderFileName, $this->orderBackupStoragePath.'/'.substr($orderFileName, strlen($this->orderStoragePath)));
+            else
+                $this->mvFile($orderFileName, $this->orderBackupStoragePath.'/'.substr($orderFileName, strlen($this->orderStoragePath)));
         }
     }
     //插入一条Order
     public function orderInsert($row)
     {
         //查询商品是否存在
-        //$merchandise = DB::table('merchandise')->where('name','=',$row['item_name'])->first();
+        if(is_null($row['item_name']) || isEmpty($row['item_name']) || is_null($row['cls_name']) || isEmpty($row['cls_name']))
+            return;
         $merchandise = Merchandise::where('name','=',$row['item_name'])->first();
         //如果商品查询失败，则商品不存在，检验创建新商品条目
         if(is_null($merchandise))
@@ -202,6 +203,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         Orders::create(
             array('order_no' => $row['account_no'],'quantity'=>$row['sub_qty'],'price'=>$row['sale_price'],'merchandise_id'=>$merchandise_id,'create_date'=>$row['create_date']->toDateTimeString(),'print_date'=>$row['sendprint_date']->toDateTimeString())
         );
+        //设置插入过order记录标志位
+        $this->hadInsertedOrders = true;
         //添加商品购买记录
     }
     //检测指定商品id和时间的订单是否存在——基于同一时间同一商品同一订单号只能存在一个
