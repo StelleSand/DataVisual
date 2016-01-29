@@ -17,14 +17,20 @@
             <ul class="nav navbar-nav navbar-left">
                 <form id="chartInfo" method="get" action="/" class="navbar-form navbar-left" role="attachedInfo">
                     <!--<input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">-->
-                    <div class="form-group">
-                        <input name="datetime" id="datetimepicker" type="datetime" class="form-control" placeholder="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii">
+                    <div id="nav-form-div" class="form-group">
+                        <!--<input name="datetime" id="datetimepicker" type="datetime" class="form-control" placeholder="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii">-->
+                        <div class="input-group date" id="datetimeDiv" data-date="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii" data-link-field="datetimepicker" data-link-format="yyyy-mm-dd hh:ii">
+                            <input class="form-control" type="text" value="{{ $datetime }}" readonly>
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                        </div>
+                        <input type="hidden" name="datetime" id="datetimepicker" value="" /><br/>
                         <div class="input-group">
                             <input id="hours" name="hours" type="number" min="0.5" step="0.5" class="form-control" value="{{ $hours }}" placeholder="{{ $hours }}">
                             <span class="input-group-addon">Hours</span>
                         </div>
                         <div class="input-group">
-                            <input id="split" name="split" type="number" min="5" step="1" max="32" class="form-control" value="{{ $split }}" placeholder="{{ $split }}">
+                            <input id="split" name="split" type="number" min="5" step="1" class="form-control" value="{{ $split }}" placeholder="{{ $split }}">
                             <span class="input-group-addon">Points</span>
                         </div>
                     </div>
@@ -38,7 +44,8 @@
     </div><!-- /.container-fluid -->
 </nav>
 <script>
-    $('#datetimepicker').datetimepicker();
+    $('#datetimeDiv ').datetimepicker();
+    $("#nav-form-div").children('br').remove();
     // 路径配置
     require.config({
         paths: {
