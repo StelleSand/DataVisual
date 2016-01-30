@@ -70,11 +70,11 @@ class MerchandiseClassTableSeeder extends Seeder{
     {
         DB::table('merchandise_class')->delete();
 
-        MerchandiseClass::create( ['name'=>'麻辣烫','create_user'=>1]);
         MerchandiseClass::create( ['name'=>'面类','create_user'=>1]);
-        MerchandiseClass::create( ['name'=>'小吃','create_user'=>1]);
-        MerchandiseClass::create( ['name'=>'饮料','create_user'=>1]);
-        MerchandiseClass::create( ['name'=>'蒸点','create_user'=>1]);
         MerchandiseClass::create( ['name'=>'称重','create_user'=>1]);
+        MerchandiseClass::create( ['name'=>'麻辣烫','create_user'=>1]);
+        MerchandiseClass::create( ['name'=>'饮料','create_user'=>1]);
+        MerchandiseClass::create( ['name'=>'小吃','create_user'=>1]);
+        MerchandiseClass::create( ['name'=>'蒸点','create_user'=>1]);
     }
 }

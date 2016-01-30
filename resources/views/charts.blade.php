@@ -20,7 +20,7 @@
                     <div id="nav-form-div" class="form-group">
                         <!--<input name="datetime" id="datetimepicker" type="datetime" class="form-control" placeholder="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii">-->
                         <div class="input-group date" id="datetimeDiv" data-date="{{ $datetime }}" data-date-format="yyyy-mm-dd hh:ii" data-link-field="datetimepicker" data-link-format="yyyy-mm-dd hh:ii">
-                            <input class="form-control" type="text" value="{{ $datetime }}" readonly>
+                            <input class="form-control" type="text" placeholder="{{ $datetime }}" readonly>
                             <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
                             <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
                         </div>

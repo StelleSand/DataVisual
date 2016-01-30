@@ -47,7 +47,7 @@ class Merchandise extends Model {
         {
             $SaleAmount += $order->price * $order->quantity;
         }
-        return $SaleAmount;
+        return round($SaleAmount, 2);
     }
 
     /*
@@ -59,7 +59,8 @@ class Merchandise extends Model {
     public function getCumulativeSaleVolume($timeStringLow,$timeStringHigh )
     {
         //选取对应时间段数据
-        $orders = $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->get();
+        //$orders = $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->get();
+        $orders = $this->orders()->where('print_date','>', $timeStringLow)->where('print_date','<=', $timeStringHigh)->get();
         $SaleVolume = 0;
         //获取对应时间点附近数据和
         foreach($orders as $order)

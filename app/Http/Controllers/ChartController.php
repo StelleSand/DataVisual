@@ -55,12 +55,12 @@ class ChartController extends Controller{
     protected $const_baowentaiID = 9;
     protected $const_kelechazuoID = 10;
 
-    protected $const_class_malatangID = 1;
-    protected $const_class_mianleiID = 2;
-    protected $const_class_xiaochiID = 3;
+    protected $const_class_mianleiID = 1;
+    protected $const_class_chengzhongID = 2;
+    protected $const_class_malatangID = 3;
     protected $const_class_yinliaoID = 4;
-    protected $const_class_zhengdianID = 5;
-    protected $const_class_chengzhongID = 6;
+    protected $const_class_xiaochiID = 5;
+    protected $const_class_zhengdianID = 6;
 
     public function __construct()
     {
@@ -140,18 +140,6 @@ class ChartController extends Controller{
     protected function init()
     {
         //初始化开始时间和结束时间
-        if(Request::has('date') && !empty(Request::input('date')))
-        {
-            $date = Request::input('date');
-            if(Request::has('time'))
-            {
-                $time = ' '.Request::input('time');
-            }
-            else
-            $time = ' 00:00:00';
-            $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $date.$time, $this->timeZone)->addDay(-1)->timestamp;
-            $this->end_time = Carbon::createFromFormat('Y-m-d H:i', $date.$time, $this->timeZone)->timestamp;
-        }
         if(Request::has('hours') && !empty(Request::input('hours')))
             $this->hours = Request::input('hours');
         else
@@ -165,17 +153,20 @@ class ChartController extends Controller{
             $this->end_time->second = 0;
             $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
             $this->end_time->addMinutes( -15 );
-            $this->start_time = $this->end_time;
+            //$this->start_time = $this->end_time;
             $this->end_time = $this->end_time->timestamp;
-            $this->start_time->addMinutes( -60 * $this->hours );
-            $this->start_time = $this->start_time->timestamp;
+            ///$this->start_time->addMinutes( -60 * $this->hours );
+            //$this->start_time = $this->start_time->timestamp;
+            $this->start_time = Carbon::today($this->timeZone)->timestamp;
+            // 如果datetime没有设置，hours设置与否都失效，计算hours
+            $this->hours = floor(($this->end_time - $this->start_time) / 3600);
         }
-        //$this->start_time = Carbon::create(2015,12,15,20,40,0,$this->timeZone)->timestamp;
-        //$this->end_time = Carbon::create(2015,12,16,20,40,0,$this->timeZone)->timestamp;
+        // 如果设置了split则采用，否则直接按照5分钟一个点来设置
         if(Request::has('split') && !empty(Request::input('split')) )
             $this->split_number = Request::input('split');
         else
-            $this->split_number = 25;
+            //$this->split_number = 25;
+            $this->split_number = ($this->end_time - $this->start_time) / 300 + 1;
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
         //构建等间隔时间点数组

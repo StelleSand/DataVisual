@@ -243,6 +243,7 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
             //计算得出每次累加的power数据单元
             if(!isset($this->powerLastInsertRow[$channelOffset]))
                 $this->powerLastInsertRow[$channelOffset] = 0;
+            // 此处精确到小数点后一位
             $valueUnits[$channelOffset] = round(($row[$channelOffset] - $this->powerLastInsertRow[$channelOffset]) / $minuteDiffer, 1);
         }
         while($timePointer->diffInMinutes($rowDateTime,false) >= 0)
