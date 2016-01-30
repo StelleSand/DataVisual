@@ -207,7 +207,6 @@ class ChartController extends Controller{
      * */
     protected function getPowerAverageValue($channel_id)
     {
-        return 0;
         //如果channel的瞬时值数组已经被设置，直接返回
         if(isset($this->channel_average_power[$channel_id]))
             return $this->channel_average_power[$channel_id];
