@@ -165,8 +165,8 @@ class ChartController extends Controller{
         if(Request::has('split') && !empty(Request::input('split')) )
             $this->split_number = Request::input('split');
         else
-            //$this->split_number = 25;
-            $this->split_number = ($this->end_time - $this->start_time) / 300 + 1;
+            $this->split_number = 25;
+            //$this->split_number = ($this->end_time - $this->start_time) / 300 + 1;
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
         //构建等间隔时间点数组
@@ -207,6 +207,7 @@ class ChartController extends Controller{
      * */
     protected function getPowerAverageValue($channel_id)
     {
+        return 0;
         //如果channel的瞬时值数组已经被设置，直接返回
         if(isset($this->channel_average_power[$channel_id]))
             return $this->channel_average_power[$channel_id];
@@ -417,7 +418,7 @@ class ChartController extends Controller{
         $chartNames = array('麻辣烫耗电(100W)','开水炉耗电(100W)','麻辣烫销售金额(元)');
         $malatangPower = $this->arrayMulNumber($this->arrayMinus($this->getPowerAverageValue($this->const_sangeluziID), $this->getPowerAverageValue($this->const_mianluID)), 0.01);
         $kaishuiluPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_kaishuiluID), 0.01);
-        $malatangAmount = $this->getMerchandiseClassSalesAmount($this->const_class_malatangID);
+        $malatangAmount = $this->arrayAdd($this->getMerchandiseClassSalesAmount($this->const_class_malatangID),$this->getMerchandiseClassSalesAmount($this->const_class_chengzhongID)) ;
         $chartPoints['chartName'] = 'Chart_3';
         $chartPoints['names'] = $chartNames;
         $chartPoints['xpoints'] = $this->timePointsString;
