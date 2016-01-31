@@ -57,4 +57,7 @@
 @foreach($charts as $chart)
     @include('chart',$chart)
 @endforeach
-@incude('footer')
+<script>
+    $(window).resize(resizeHandle);
+</script>
+@include('footer')

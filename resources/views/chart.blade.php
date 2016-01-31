@@ -1,5 +1,5 @@
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-<div id="{{ $chartName }}"></div>
+<div id="{{ $chartName }}" class="chartDiv"></div>
 <script type="text/javascript">
     var clientWidth = document.body.clientWidth;
     var height = Math.round(clientWidth * 0.30674847);
@@ -85,7 +85,6 @@
                         @endfor
                     ]
                 };
-
                 // 为echarts对象加载数据
                 myChart.setOption(option);
                 globalCharts['{{ $chartName }}'] = myChart;
