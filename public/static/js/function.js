@@ -35,14 +35,11 @@ function updateCharts(result, status)
 }
 function resizeHandle()
 {
-    /*var width = $(this).width();
-    console.log( $('.chartDiv'));
-    $('.chartDiv').each(function(){
-        var height = Math.round(clientWidth * 0.30674847);
-        if (height < 300)
-            height = 300;
-        $(this).css('height',height.toString() + 'px');
-    });*/
+    var clientWidth = document.body.clientWidth;
+    var height = Math.round(clientWidth * 0.30674847);
+    if (height < 300)
+        height = 300;
+    $(".chartDiv").css('height',height.toString() + 'px');
     for(var chartName in globalCharts) {
         globalCharts[chartName].resize();
     }
