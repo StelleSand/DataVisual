@@ -59,5 +59,6 @@
 @endforeach
 <script>
     $(window).resize(resizeHandle);
+    $(window).on('orientationchange',resizeHandle());
 </script>
 @include('footer')
