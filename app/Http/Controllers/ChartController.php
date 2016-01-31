@@ -319,6 +319,7 @@ class ChartController extends Controller{
     // 返回数组都乘以一个常数后的结果
     protected function arrayMulNumber($array, $number)
     {
+        if($number == 1) return $array;
         $result = array();
         for ($i = 0; $i < $this->split_number; $i++)
         {
@@ -364,17 +365,28 @@ class ChartController extends Controller{
     {
         //初始化表chartPoints数组
         $chartPoints = array();
-        $chartNames = array('总耗电(100W)','总销售额(元)','生产耗电(100W)','展示柜冰箱(100W)','存储耗电(100W)','开水炉(100W)');
-        $allPowerPoints = $this->arrayMulNumber($this->getPowerAverageValue($this->const_allPowerID), 0.01);
+        //$chartNames = array('总耗电(100W)','总销售额(元)','生产耗电(100W)','展示柜冰箱(100W)','存储耗电(100W)','开水炉(100W)');
+        $chartNames = array('总耗电(W)','总销售额(元)','生产耗电(W)','展示柜冰箱耗电(W)','存储耗电(W)','开水炉耗电(W)');
+
+        //$allPowerPoints = $this->arrayMulNumber($this->getPowerAverageValue($this->const_allPowerID), 0.01);
+        $allPowerPoints = $this->getPowerAverageValue($this->const_allPowerID);
+
         $allSaleAmountPoints = $this->getAllMerchandiseClassSaleAmount();
         $productPower = $this->arrayAdd($this->getPowerAverageValue($this->const_sangeluziID), $this->getPowerAverageValue($this->const_zhengbaoluID));
         $productPower = $this->arrayAdd($productPower, $this->getPowerAverageValue($this->const_baowentaiID));
         $productPower = $this->arrayAdd($productPower, $this->getPowerAverageValue($this->const_paiqishanID));
-        $productPower = $this->arrayMulNumber($productPower, 0.01);
 
-        $zhanshiguiPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_zhanshiguiID), 0.01);
-        $cunchuPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_sangebingxiangID), 0.01);
-        $kaishuiluPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_kaishuiluID), 0.01);
+        //$productPower = $this->arrayMulNumber($productPower, 0.01);
+        $productPower = $productPower;
+
+        //$zhanshiguiPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_zhanshiguiID), 0.01);
+        $zhanshiguiPower = $this->getPowerAverageValue($this->const_zhanshiguiID);
+
+        //$cunchuPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_sangebingxiangID), 0.01);
+        $cunchuPower = $this->getPowerAverageValue($this->const_sangebingxiangID);
+
+        //$kaishuiluPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_kaishuiluID), 0.01);
+        $kaishuiluPower = $this->getPowerAverageValue($this->const_kaishuiluID);
 
         $chartPoints['chartName'] = 'Chart_1';
         $chartPoints['names'] = $chartNames;
@@ -386,6 +398,7 @@ class ChartController extends Controller{
         $chartPoints['ypoints'][3] = $zhanshiguiPower;
         $chartPoints['ypoints'][4] = $cunchuPower;
         $chartPoints['ypoints'][5] = $kaishuiluPower;
+        $chartPoints['types'] = ['power','amount','power','power','power','power'];
 
         return $chartPoints;
     }
@@ -394,11 +407,20 @@ class ChartController extends Controller{
     {
         //初始化表chartPoints数组
         $chartPoints = array();
-        $chartNames = array('面炉耗电(1000W)','保温台耗电(1000W)','面类销售量(碗)','面类销售额(10元)');
+        //$chartNames = array('面炉耗电(1000W)','保温台耗电(1000W)','面类销售量(碗)','面类销售额(10元)');
+        $chartNames = array('面炉耗电(W)','保温台耗电(W)','面类销售量(碗)','面类销售额(元)');
+
+        /* old version
         $mianluPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_mianluID), 0.001);
         $baowentaiPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_baowentaiID),0.001);
         $mianleiSaleVolume = $this->getMerchandiseClassSalesVolume($this->const_class_mianleiID);
         $mianleiSaleAmount = $this->arrayMulNumber($this->getMerchandiseClassSalesAmount($this->const_class_mianleiID), 0.1);
+        */
+        $mianluPower = $this->getPowerAverageValue($this->const_mianluID);
+        $baowentaiPower = $this->getPowerAverageValue($this->const_baowentaiID);
+        $mianleiSaleVolume = $this->getMerchandiseClassSalesVolume($this->const_class_mianleiID);
+        $mianleiSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_mianleiID);
+
         $chartPoints['chartName'] = 'Chart_2';
         $chartPoints['names'] = $chartNames;
         $chartPoints['xpoints'] = $this->timePointsString;
@@ -407,6 +429,7 @@ class ChartController extends Controller{
         $chartPoints['ypoints'][1] = $baowentaiPower;
         $chartPoints['ypoints'][2] = $mianleiSaleVolume;
         $chartPoints['ypoints'][3] = $mianleiSaleAmount;
+        $chartPoints['types'] = ['power','power','volume','amount'];
         return $chartPoints;
     }
 
@@ -414,10 +437,18 @@ class ChartController extends Controller{
     {
         //初始化表chartPoints数组
         $chartPoints = array();
-        $chartNames = array('麻辣烫耗电(100W)','开水炉耗电(100W)','麻辣烫销售金额(元)');
+        //$chartNames = array('麻辣烫耗电(100W)','开水炉耗电(100W)','麻辣烫销售金额(元)');
+        $chartNames = array('麻辣烫耗电(W)','开水炉耗电(W)','麻辣烫销售金额(元)');
+        /*
+         * old version
         $malatangPower = $this->arrayMulNumber($this->arrayMinus($this->getPowerAverageValue($this->const_sangeluziID), $this->getPowerAverageValue($this->const_mianluID)), 0.01);
         $kaishuiluPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_kaishuiluID), 0.01);
         $malatangAmount = $this->arrayAdd($this->getMerchandiseClassSalesAmount($this->const_class_malatangID),$this->getMerchandiseClassSalesAmount($this->const_class_chengzhongID)) ;
+        */
+        $malatangPower =$this->arrayMinus($this->getPowerAverageValue($this->const_sangeluziID), $this->getPowerAverageValue($this->const_mianluID));
+        $kaishuiluPower = $this->getPowerAverageValue($this->const_kaishuiluID);
+        $malatangAmount = $this->arrayAdd($this->getMerchandiseClassSalesAmount($this->const_class_malatangID),$this->getMerchandiseClassSalesAmount($this->const_class_chengzhongID)) ;
+
         $chartPoints['chartName'] = 'Chart_3';
         $chartPoints['names'] = $chartNames;
         $chartPoints['xpoints'] = $this->timePointsString;
@@ -425,6 +456,7 @@ class ChartController extends Controller{
         $chartPoints['ypoints'][0] = $malatangPower;
         $chartPoints['ypoints'][1] = $kaishuiluPower;
         $chartPoints['ypoints'][2] = $malatangAmount;
+        $chartPoints['types'] = ['power','power','amount'];
         return $chartPoints;
     }
 
@@ -432,15 +464,22 @@ class ChartController extends Controller{
     {
         //初始化表chartPoints数组
         $chartPoints = array();
-        $chartNames = array('蒸包炉耗电(1000W)','蒸点销售量(份)');
+        //$chartNames = array('蒸包炉耗电(1000W)','蒸点销售量(份)');
+        $chartNames = array('蒸包炉耗电(W)','蒸点销售量(份)');
+        /*
         $zhengbaoluPower = $this->arrayMulNumber($this->getPowerAverageValue($this->const_zhengbaoluID), 0.001);
         $zhengdianSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_zhengdianID);
+        */
+        $zhengbaoluPower = $this->getPowerAverageValue($this->const_zhengbaoluID);
+        $zhengdianSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_zhengdianID);
+
         $chartPoints['chartName'] = 'Chart_4';
         $chartPoints['names'] = $chartNames;
         $chartPoints['xpoints'] = $this->timePointsString;
         $chartPoints['ypoints'] = array();
         $chartPoints['ypoints'][0] = $zhengbaoluPower;
         $chartPoints['ypoints'][1] = $zhengdianSaleAmount;
+        $chartPoints['types'] = ['power','volume'];
         return $chartPoints;
     }
 
@@ -465,6 +504,7 @@ class ChartController extends Controller{
         $chartPoints['ypoints'][3] = $zhengdianSaleAmount;
         $chartPoints['ypoints'][4] = $xiaochiSaleAmount;
         $chartPoints['ypoints'][5] = $yinliaoSaleAmount;
+        $chartPoints['types'] = ['amount','amount','amount','amount','amount','amount'];
         return $chartPoints;
     }
 

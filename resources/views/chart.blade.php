@@ -3,8 +3,8 @@
 <script type="text/javascript">
     var clientWidth = document.body.clientWidth;
     var height = Math.round(clientWidth * 0.30674847);
-    if (height < 350)
-        height = 350;
+    if (height < 300)
+        height = 300;
     $("#{{ $chartName }}").css('height',height.toString() + 'px');
     // 使用
     require(
@@ -22,19 +22,20 @@
                         trigger: 'axis'
                     },
                     legend: {
-                        data:<?php echo json_encode($names); ?>
+                        data:<?php echo json_encode($names); ?>,
+                        padding : [5,0]
                     },
                     toolbox: {
                         show : true,
                         feature : {
-                            mark : {show: false},
-                            dataView : {show: true, readOnly: false},
-                            magicType : {show: true, type: ['stack', 'tiled']},
-                            restore : {show: true},
+                            //mark : {show: false},
+                            //dataView : {show: true, readOnly: false},
+                            magicType : {show: true, type: ['line','bar','stack', 'tiled']},
+                            //restore : {show: true},
                             saveAsImage : {show: true}
                         }
                     },
-                    calculable : false,
+                    calculable : true,
                     xAxis : [
                         {
                             type : 'category',
@@ -44,7 +45,21 @@
                     ],
                     yAxis : [
                         {
-                            type : 'value'
+                            type : 'value',
+                            axisLabel : {
+                                formatter: '{value} W'
+                            },
+                            name : '功率',
+                            nameLocation : 'end'
+                        },
+                        {
+                            type : 'value',
+                            axisLabel : {
+                                formatter: '{value}'
+                            },
+                            name : '销售额(元)/销量(份)',
+                            nameLocation : 'end',
+                            position:'<?php foreach($types as $type) if($type == 'power') {echo 'right'; goto over;} echo 'left'; over:;  ?>',
                         }
                     ],
                     series : [
@@ -52,9 +67,18 @@
                         {
                             name:'{{$names[$i] }}',
                             type:'line',
-                            stack: '总量',
+                            yAxisIndex : {{ $types[$i] == 'power'? 0:1 }},
+                            stack: '{{ $types[$i] }}',
+                            clipOverflow : false,
                             itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                            data:<?php echo json_encode($ypoints[$i]); ?>
+                            data:<?php echo json_encode($ypoints[$i]); ?>,
+                            @if($types[$i] == 'power')
+                            markLine : {
+                                data : [
+                                    {type : 'average', name: '平均{{ $names[$i] }}'}
+                                ]
+                            },
+                            @endif
                         }
                         @if($i < count($names) - 1 ) {{ ',' }}
                         @endif
