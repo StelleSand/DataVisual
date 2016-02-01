@@ -35,7 +35,7 @@
                             saveAsImage : {show: true}
                         }
                     },
-                    calculable : true,
+                    calculable : false,
                     xAxis : [
                         {
                             type : 'category',
@@ -50,7 +50,8 @@
                                 formatter: '{value} W'
                             },
                             name : '功率',
-                            nameLocation : 'end'
+                            nameLocation : 'end',
+                            min : 0
                         },
                         {
                             type : 'value',
@@ -59,6 +60,7 @@
                             },
                             name : '销售额(元)/销量(份)',
                             nameLocation : 'end',
+                            min : 0,
                             position:'<?php foreach($types as $type) if($type == 'power') {echo 'right'; goto over;} echo 'left'; over:;  ?>',
                         }
                     ],

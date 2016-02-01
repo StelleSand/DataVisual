@@ -21,7 +21,8 @@ use Request;
 class ChartController extends Controller{
     protected $start_time;//起始时间
     protected $end_time;//结束时间
-    protected $hours;//跨度时长
+    protected $timeLength = null;//跨度时长
+    protected $range = null;//跨度时间单位
     protected $split_number;//图表取点个数
     protected $timePoints = array();//计算得出的时间点数组
     protected $timePointsString = array();
@@ -129,7 +130,7 @@ class ChartController extends Controller{
         if(is_null($line) || is_null($chart))
         {
             dump($line);
-            dump(chart);
+            dump($chart);
         }
         $chartLine = ChartLineMatch::where('chart_id',$chart->id)->where('line_id',$line->id);
         if(!is_null($chartLine))
@@ -139,14 +140,33 @@ class ChartController extends Controller{
 
     protected function init()
     {
+        $this->range = Request::has('range') && !empty(Request::input('range'))? Request::input('range') : null;
         //初始化开始时间和结束时间
-        if(Request::has('hours') && !empty(Request::input('hours')))
-            $this->hours = Request::input('hours');
-        else
-            $this->hours = 24;
-        if(Request::has('datetime') && !empty(Request::input('datetime'))) {
-            $this->end_time = Carbon::createFromFormat('Y-m-d H:i', Request::input('datetime'), $this->timeZone)->timestamp;
-            $this->start_time = Carbon::createFromFormat('Y-m-d H:i', Request::input('datetime'), $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
+        $this->timeLength = Request::has('timelength') && !empty(Request::input('timelength'))? Request::input('timelength') : 0;
+        $datetime = Request::has('datetime') && !empty(Request::input('datetime'))? Request::input('datetime') : null;
+        if(!is_null($datetime)) {
+            $this->end_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->timestamp;
+            switch($this->range){
+                case null:
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addDays( - 1 )->timestamp;
+                    break;
+                case 'hour':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addHours( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'day':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addDays( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'week':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addWeeks( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'month':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addMonths( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'year':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addYears( 0 - $this->timeLength)->timestamp;
+                    break;
+            }
+            //$this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
         }
         else {
             $this->end_time = Carbon::now($this->timeZone);
@@ -158,8 +178,9 @@ class ChartController extends Controller{
             ///$this->start_time->addMinutes( -60 * $this->hours );
             //$this->start_time = $this->start_time->timestamp;
             $this->start_time = Carbon::today($this->timeZone)->timestamp;
-            // 如果datetime没有设置，hours设置与否都失效，计算hours
-            $this->hours = floor(($this->end_time - $this->start_time) / 3600);
+            // 如果datetime没有设置，其他设置都无效，计算其他数据
+            $this->timeLength = floor(($this->end_time - $this->start_time) / 3600);
+            $this->range = 'hour';
         }
         // 如果设置了split则采用，否则直接按照5分钟一个点来设置
         if(Request::has('split') && !empty(Request::input('split')) )
@@ -167,6 +188,11 @@ class ChartController extends Controller{
         else
             $this->split_number = 25;
             //$this->split_number = ($this->end_time - $this->start_time) / 300 + 1;
+        //设置相关全局返回数据
+        $this->data['datetime'] = $this->timeStampToString($this->end_time);
+        $this->data['split'] = $this->split_number;
+        $this->data['range'] = $this->range;
+        $this->data['timeLength'] = $this->timeLength;
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
         //构建等间隔时间点数组
@@ -337,7 +363,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return json_encode(['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours, 'split' => $this->split_number]);
+        return json_encode(['charts'=>$charts]);
     }
 
     public function testDiagram()
@@ -349,7 +375,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return view('charts',['charts'=>$charts, 'datetime' => $this->timeStampToString($this->end_time), 'hours' => $this->hours, 'split' => $this->split_number]);
+        return view('charts',['charts'=>$charts,'data'=>$this->data]);
     }
 
     /*
@@ -471,14 +497,14 @@ class ChartController extends Controller{
         $zhengdianSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_zhengdianID);
         */
         $zhengbaoluPower = $this->getPowerAverageValue($this->const_zhengbaoluID);
-        $zhengdianSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_zhengdianID);
+        $zhengdianSaleVolume = $this->getMerchandiseClassSalesVolume($this->const_class_zhengdianID);
 
         $chartPoints['chartName'] = 'Chart_4';
         $chartPoints['names'] = $chartNames;
         $chartPoints['xpoints'] = $this->timePointsString;
         $chartPoints['ypoints'] = array();
         $chartPoints['ypoints'][0] = $zhengbaoluPower;
-        $chartPoints['ypoints'][1] = $zhengdianSaleAmount;
+        $chartPoints['ypoints'][1] = $zhengdianSaleVolume;
         $chartPoints['types'] = ['power','volume'];
         return $chartPoints;
     }
@@ -489,7 +515,7 @@ class ChartController extends Controller{
         $chartPoints = array();
         $chartNames = array('总销售额(元)','麻辣烫销售额(元)','面类销售额(元)','蒸点销售额(元)','小吃销售额(元)','饮料销售额(元)');
         $allSaleAmount = $this->getAllMerchandiseClassSaleAmount();
-        $malatangSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_malatangID);
+        $malatangSaleAmount = $this->arrayAdd($this->getMerchandiseClassSalesAmount($this->const_class_malatangID),$this->getMerchandiseClassSalesAmount($this->const_class_chengzhongID)) ;
         $mianleiSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_mianleiID);
         $zhengdianSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_zhengdianID);
         $xiaochiSaleAmount = $this->getMerchandiseClassSalesAmount($this->const_class_xiaochiID);

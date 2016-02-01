@@ -36,6 +36,7 @@ class Channel extends Model {
      * */
     public function getAveragePower($timeStringLow,$timeStringHigh )
     {
+        /*
         //选取对应时间段数据
         $records = $this->records()->whereBetween('date',array($timeStringLow,$timeStringHigh))->where('record_type','=','power')->get();
         $records_sum = 0;
@@ -51,6 +52,8 @@ class Channel extends Model {
         else
             $average_value = $records_sum / count($records);
         return $average_value;
+        */
+        return  $this->records()->whereBetween('date',array($timeStringLow,$timeStringHigh))->where('record_type','=','power')->avg('value');
     }
 
 }

@@ -38,6 +38,7 @@ class Merchandise extends Model {
      * */
     public function getCumulativeSaleAmount($timeStringLow,$timeStringHigh )
     {
+        /*
         //选取对应时间段数据,目前设置为选取print_date,此字段可调整
         //$orders = $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->get();
         $orders = $this->orders()->where('print_date','>', $timeStringLow)->where('print_date','<=',$timeStringHigh)->get();
@@ -48,8 +49,12 @@ class Merchandise extends Model {
             $SaleAmount += $order->price * $order->quantity;
         }
         return round($SaleAmount, 2);
+        */
+        //$orders = $this->orders()->where('print_date','>', $timeStringLow)->where('print_date','<=',$timeStringHigh)->sum('price * quantity');
+        //$sum = $this->orders()->select(DB::raw('sum(price * quantity)'))->where('print_date','>', $timeStringLow)->where('print_date','<=',$timeStringHigh)->get()->toArray();
+        $result = DB::table('orders')->select(DB::raw('sum(price * quantity) as sum'))->where('merchandise_id', $this->id)->where('print_date', '>', $timeStringLow)->where('print_date', '<=', $timeStringHigh)->first();
+        return is_null($result) ? 0 : $result->sum;
     }
-
     /*
      * 获取Orders数据在指定时间间隔中的累计销售额
      * 参数为(较早时间点时间戳,较晚时间点时间戳);
@@ -58,6 +63,8 @@ class Merchandise extends Model {
      * */
     public function getCumulativeSaleVolume($timeStringLow,$timeStringHigh )
     {
+        /*
+         *
         //选取对应时间段数据
         $orders = $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->get();
         //$orders = $this->orders()->where('print_date','>', $timeStringLow)->where('print_date','<=', $timeStringHigh)->get();
@@ -68,5 +75,7 @@ class Merchandise extends Model {
             $SaleVolume += $order->quantity;
         }
         return $SaleVolume;
+        */
+        return $this->orders()->whereBetween('print_date',array($timeStringLow,$timeStringHigh))->sum('quantity');
     }
 }
