@@ -193,8 +193,10 @@ class ChartController extends Controller{
         $this->data['split'] = $this->split_number;
         $this->data['range'] = $this->range;
         $this->data['timeLength'] = $this->timeLength;
+
         $result = $this->end_time - $this->start_time;
         $this->split_space = $result / ($this->split_number-1);
+        $this->data['space'] = $this->split_space;
         //构建等间隔时间点数组
         //第一个点为开始点往前推算split_space时间间隔的点，用于计算第一个时间点的值,offset 为 -1
         //实际上timePoints数组有split_number + 1个点但是由于第一个点下标为-1,所以前端并不会使用，而会忽略这个下标为-1的点

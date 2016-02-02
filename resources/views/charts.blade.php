@@ -56,8 +56,8 @@
                 <form id="chartInfo" method="get" action="" class="form-horizontal" role="attachedInfo">
                     <div id="option-form-div" class="form-group">
                         <div class="form-group">
-                            <label for="range" class="col-xs-offset-3 col-sm-offset-3 col-sm-2 col-xs-2 col-md-2 control-label">Time Range</label>
-                            <div class="col-sm-4 col-xs-4">
+                            <label for="range" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Time Range</label>
+                            <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group">
                                     <input type="text" class="form-control" required id="range" name="range" placeholder="{{ $data['range'] }}" readonly>
                                     <div class="input-group-btn">
@@ -74,8 +74,8 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="datetimepicker" class="col-xs-offset-3 col-sm-offset-3 col-sm-2 col-xs-2 col-md-2 control-label">Check Time</label>
-                            <div class="col-sm-4 col-xs-4">
+                            <label for="datetimepicker" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Check Time</label>
+                            <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group date" id="datetimeDiv" data-date="{{ $data['datetime'] }}" data-date-format="yyyy-mm-dd hh:ii" data-link-field="datetimepicker" data-link-format="yyyy-mm-dd hh:ii">
                                     <input class="form-control" type="text" value="" placeholder="{{ $data['datetime'] }}" readonly>
                                     <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
@@ -85,8 +85,8 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="timelength" class="col-xs-offset-3 col-sm-offset-3 col-sm-2 col-xs-2 col-md-2 control-label">Check Time</label>
-                            <div class="col-sm-4 col-xs-4">
+                            <label for="timelength" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Time Length</label>
+                            <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group">
                                     <input id="hours" name="timelength" type="number" min="1" step="1" class="form-control" value="1" placeholder="{{ $data['timeLength'] }}">
                                     <span class="input-group-addon" id="timeUnit">{{ $data['range'].'s' }}</span>
@@ -94,8 +94,8 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="timelength" class="col-xs-offset-3 col-sm-offset-3 col-sm-2 col-xs-2 col-md-2 control-label">Split Number</label>
-                            <div class="col-sm-4 col-xs-4">
+                            <label for="timelength" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Split Number</label>
+                            <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group">
                                     <input id="split" name="split" type="number" min="5" step="1" class="form-control" value="{{ $data['split'] }}" placeholder="{{ $data['split'] }}">
                                     <span class="input-group-addon">Points</span>
@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <div class="col-sm-offset-5 col-sm-4">
+                        <div class="col-xs-offset-4 col-sm-offset-4 col-md-offset-4 col-sm-6 col-xs-6 col-md-4">
                             <button type="submit" class="btn btn-default">View</button>
                         </div>
                     </div>
@@ -124,7 +124,10 @@
     });
     var globalCharts = {};
 </script>
+<?php
+?>
 @foreach($charts as $chart)
+    <?php $chart['data'] = $data;?>
     @include('chart',$chart)
 @endforeach
 <script>

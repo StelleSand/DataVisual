@@ -147,6 +147,8 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         //对获取到的每个orderFile名字进行处理
         foreach($this->orderFileNames as $orderFileName)
         {
+            //对于每个文件，初始时设置为都没有过插入记录
+            $this->hadInsertedOrders = false;
             //如果其中有文件是gitignore文件，直接跳过
             if($orderFileName == $this->orderStoragePath.'.gitignore')
                 continue;
@@ -196,24 +198,24 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
             $merchandise_id = $merchandise->id;
             //检测订单是否已存在，防止重复插入
             //如果要求不查重,则直接跳过查重函数。
-            if($this->orderRecordRepeatCheck && $this->orderExist($merchandise_id, $row['account_no'], $row['sendprint_date']->toDateTimeString(), $row['create_date']->toDateTimeString(), $row['sub_qty']))
-                return ;
+            //if($this->orderRecordRepeatCheck && $this->orderExist($merchandise_id, $row['account_no'], $row['sendprint_date']->toDateTimeString(), $row['create_date']->toDateTimeString(), $row['sub_qty']))
+            //    return ;
         }
-        //根据商品id插入order
-        Orders::create(
-            array('order_no' => $row['account_no'],'quantity'=>$row['sub_qty'],'price'=>$row['sale_price'],'merchandise_id'=>$merchandise_id,'create_date'=>$row['create_date']->toDateTimeString(),'print_date'=>$row['sendprint_date']->toDateTimeString())
-        );
+        //根据商品id插入order,无论如何都会查重
+        $orderArray = array('order_no' => $row['account_no'],'quantity'=>$row['sub_qty'],'price'=>$row['sale_price'],'merchandise_id'=>$merchandise_id,'create_date'=>$row['create_date']->toDateTimeString(),'print_date'=>$row['sendprint_date']->toDateTimeString());
+        Orders::firstOrCreate($orderArray);
         //设置插入过order记录标志位
         $this->hadInsertedOrders = true;
         //添加商品购买记录
     }
     //检测指定商品id和时间的订单是否存在——基于同一时间同一商品同一订单号只能存在一个
-    public function orderExist($merchandise_id,$order_no,$print_date, $create_date, $quantity)
+    //此函数目前废弃
+    /*public function orderExist($merchandise_id,$order_no,$print_date, $create_date, $quantity)
     {
         $order = Orders::where('merchandise_id','=',$merchandise_id)->where('order_no','=',$order_no)->where('print_date','=',$print_date)->where('create_date', '=', $create_date)->where('quantity','=',$quantity)->first();
         return !is_null($order);
     }
-
+    */
     //插入一条Power_record记录
     public function powerRecordInsert($row)
     {
@@ -248,8 +250,9 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
         }
         while($timePointer->diffInMinutes($rowDateTime,false) >= 0)
         {
-            //获取这次插值距离lastInsertRow的分钟数
-            $minutesAdded = $timePointer->diffInMinutes($rowDateTime,false);
+            //获取这次插值距离lastInsertRow的分钟数,用$timePointer - $lastInsertTime获得
+            //$minutesAdded = $timePointer->diffInMinutes($rowDateTime, false);
+            $minutesAdded = $lastInsertTime->diffInMinutes($timePointer, false);
             foreach($this->userChannels as $channel)
             {
                 $channelRecordArray = array();

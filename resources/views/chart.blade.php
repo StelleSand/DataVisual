@@ -113,7 +113,7 @@
                             <td>现在</td>
                             @for($i = 0; $i < count($names); $i ++)
                             <td>
-                                {{ $ypoints[$i][count($ypoints[$i]) - 1] }}
+                                {{ $ypoints[$i][count($ypoints[$i]) - 1] * ($types[$i] == 'power'? $data['space'] / 3600 : 1) }}
                             </td>
                             @endfor
                         </tr>
@@ -125,7 +125,7 @@
                                 @foreach($ypoints[$i] as $ypoint)
                                     <?php $result += $ypoint; ?>
                                 @endforeach
-                                {{ $result }}
+                                {{ $result * ($types[$i] == 'power'? $data['space'] / 3600 : 1) }}
                             </td>
                             @endfor
                         </tr>
