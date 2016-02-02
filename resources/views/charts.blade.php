@@ -59,7 +59,7 @@
                             <label for="range" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Time Range</label>
                             <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group">
-                                    <input type="text" class="form-control" required id="range" name="range" placeholder="{{ $data['range'] }}" readonly>
+                                    <input type="text" class="form-control" required id="range" name="range" value="{{ $data['range'] }}" placeholder="{{ $data['range'] }}" readonly>
                                     <div class="input-group-btn">
                                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Range <span class="caret"></span></button>
                                         <ul class="dropdown-menu">
@@ -77,7 +77,7 @@
                             <label for="datetimepicker" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Check Time</label>
                             <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group date" id="datetimeDiv" data-date="{{ $data['datetime'] }}" data-date-format="yyyy-mm-dd hh:ii" data-link-field="datetimepicker" data-link-format="yyyy-mm-dd hh:ii">
-                                    <input class="form-control" type="text" value="" placeholder="{{ $data['datetime'] }}" readonly>
+                                    <input class="form-control" type="text" value="{{ $data['datetime'] }}" placeholder="{{ $data['datetime'] }}" readonly>
                                     <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
                                     <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
                                 </div>
@@ -88,7 +88,7 @@
                             <label for="timelength" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Time Length</label>
                             <div class="col-sm-6 col-xs-6 col-md-4">
                                 <div class="input-group">
-                                    <input id="hours" name="timelength" type="number" min="1" step="1" class="form-control" value="1" placeholder="{{ $data['timeLength'] }}">
+                                    <input id="hours" name="timelength" type="number" min="1" step="1" class="form-control" value="{{ $data['timeLength'] }}" placeholder="{{ $data['timeLength'] }}">
                                     <span class="input-group-addon" id="timeUnit">{{ $data['range'].'s' }}</span>
                                 </div>
                             </div>

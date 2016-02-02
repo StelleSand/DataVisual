@@ -171,12 +171,12 @@ class ChartController extends Controller{
         else {
             $this->end_time = Carbon::now($this->timeZone);
             $this->end_time->second = 0;
-            $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
-            $this->end_time->addMinutes( -15 );
-            //$this->start_time = $this->end_time;
+            // 对于凌晨的时候特殊处理，否则会出现错误
+            if(!($this->end_time->hour == 0 && $this->end_time->minute < 30)) {
+                $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
+                $this->end_time->addMinutes(-15);
+            }
             $this->end_time = $this->end_time->timestamp;
-            ///$this->start_time->addMinutes( -60 * $this->hours );
-            //$this->start_time = $this->start_time->timestamp;
             $this->start_time = Carbon::today($this->timeZone)->timestamp;
             // 如果datetime没有设置，其他设置都无效，计算其他数据
             $this->timeLength = floor(($this->end_time - $this->start_time) / 3600);
