@@ -58,14 +58,14 @@ function allConfigChart(chartData)
     {
         option.series[i].data = chartData['ypoints'][i];
         var result = 0;
-        for(var j = 0; j < chartData['ypoints'][i].length; j++)
+        for(var j = 1; j < chartData['ypoints'][i].length; j++)
         {
             result += chartData['ypoints'][i][j];
         }
-        var factor = chartData['types'][i] == 'power'? (parseFloat(globalData['space'].toString()) / 3600).toFixed(2) : 1;
-        var nowValue = chartData['ypoints'][i][chartData['ypoints'][i].length - 1] * factor;
+        var factor = chartData['types'][i] == 'power'? parseFloat(globalData['space'].toString()) / 3600 : 1;
+        var nowValue = Math.floor(chartData['ypoints'][i][chartData['ypoints'][i].length - 1] * factor);
         $('#now_' + chartData['chartName'] + '_' + i.toString()).text(nowValue.toString());
-        var accumulationValue = result * factor;
+        var accumulationValue = Math.floor(result * factor);
         $('#accumulation_' + chartData['chartName'] + '_' + i.toString()).text(accumulationValue.toString());
     }
 
@@ -83,14 +83,14 @@ function partConfigChart(chartData)
         option.series[i].data.push(chartData['ypoints'][i][1]);
         var data = option.series[i].data;
         var result = 0;
-        for(var j = 0; j < data.length; j++)
+        for(var j = 1; j < data.length; j++)
         {
             result += data[j];
         }
-        var factor = chartData['types'][i] == 'power'? (parseFloat(globalData['space'].toString()) / 3600).toFixed(2) : 1;
-        var nowValue = chartData['ypoints'][i][chartData['ypoints'][i].length - 1] * factor;
+        var factor = chartData['types'][i] == 'power'? parseFloat(globalData['space'].toString()) / 3600 : 1;
+        var nowValue = Math.floor(chartData['ypoints'][i][chartData['ypoints'][i].length - 1] * factor);
         $('#now_' + chartData['chartName'] + '_' + i.toString()).text(nowValue.toString());
-        var accumulationValue = result * factor;
+        var accumulationValue = Math.floor(result * factor);
         $('#accumulation_' + chartData['chartName'] + '_' + i.toString()).text(accumulationValue.toString());
     }
 
