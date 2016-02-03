@@ -103,7 +103,7 @@
                         <tr>
                             <td>现在</td>
                             @for($i = 0; $i < count($names); $i ++)
-                            <td>
+                            <td id="{{ 'now_'.$chartName.'_'.$i }}">
                                 {{ $ypoints[$i][count($ypoints[$i]) - 1] * ($types[$i] == 'power'? round($data['space'] / 3600, 2) : 1) }}
                             </td>
                             @endfor
@@ -111,7 +111,7 @@
                         <tr>
                             <td>累计</td>
                             @for($i = 0; $i < count($names); $i ++)
-                            <td>
+                            <td id="{{ 'accumulation_'.$chartName.'_'.$i }}">
                                 <?php $result = 0;?>
                                 @foreach($ypoints[$i] as $ypoint)
                                     <?php $result += $ypoint; ?>

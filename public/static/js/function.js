@@ -36,8 +36,7 @@ function ajaxUpdateCharts()
 function allReplaceCharts(result, status)
 {
     var result = JSON.parse(result);
-    //console.log(result);
-    //更新全局变量data
+    //更新全局变量 globalData
     globalData = result['data'];
     for(var i = 0; i < result['charts'].length; i++)
         allConfigChart(result['charts'][i]);
@@ -45,7 +44,8 @@ function allReplaceCharts(result, status)
 function partReplaceCharts(result, status)
 {
     var result = JSON.parse(result);
-    //console.log(result);
+    //更新全局变量 globalData
+    globalData = result['data'];
     for(var i = 0; i < result['charts'].length; i++)
         partConfigChart(result['charts'][i]);
 }
@@ -57,6 +57,16 @@ function allConfigChart(chartData)
     for(var i = 0; i < chartData['names'].length; i++)
     {
         option.series[i].data = chartData['ypoints'][i];
+        var result = 0;
+        for(var j = 0; j < chartData['ypoints'][i].length; j++)
+        {
+            result += chartData['ypoints'][i][j];
+        }
+        var factor = chartData['types'][i] == 'power'? (parseFloat(globalData['space'].toString()) / 3600).toFixed(2) : 1;
+        var nowValue = chartData['ypoints'][i][chartData['ypoints'][i].length - 1] * factor;
+        $('#now_' + chartData['chartName'] + '_' + i.toString()).text(nowValue.toString());
+        var accumulationValue = result * factor;
+        $('#accumulation_' + chartData['chartName'] + '_' + i.toString()).text(accumulationValue.toString());
     }
 
     option.xAxis[0].data = chartData['xpoints'];
@@ -71,6 +81,17 @@ function partConfigChart(chartData)
     {
         option.series[i].data.shift();
         option.series[i].data.push(chartData['ypoints'][i][1]);
+        var data = option.series[i].data;
+        var result = 0;
+        for(var j = 0; j < data.length; j++)
+        {
+            result += data[j];
+        }
+        var factor = chartData['types'][i] == 'power'? (parseFloat(globalData['space'].toString()) / 3600).toFixed(2) : 1;
+        var nowValue = chartData['ypoints'][i][chartData['ypoints'][i].length - 1] * factor;
+        $('#now_' + chartData['chartName'] + '_' + i.toString()).text(nowValue.toString());
+        var accumulationValue = result * factor;
+        $('#accumulation_' + chartData['chartName'] + '_' + i.toString()).text(accumulationValue.toString());
     }
 
     option.xAxis[0].data.shift();
