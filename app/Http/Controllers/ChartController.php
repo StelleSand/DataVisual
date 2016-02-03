@@ -142,13 +142,16 @@ class ChartController extends Controller{
     {
         $this->range = Request::has('range') && !empty(Request::input('range'))? Request::input('range') : null;
         //初始化开始时间和结束时间
-        $this->timeLength = Request::has('timelength') && !empty(Request::input('timelength'))? Request::input('timelength') : 0;
+        $this->timeLength = Request::has('timelength') && !empty(Request::input('timelength'))? Request::input('timelength') : null;
         $datetime = Request::has('datetime') && !empty(Request::input('datetime'))? Request::input('datetime') : null;
         if(!is_null($datetime)) {
             $this->end_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->timestamp;
             switch($this->range){
                 case null:
                     $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addDays( - 1 )->timestamp;
+                    break;
+                case 'minute':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addMinutes( 0 - $this->timeLength)->timestamp;
                     break;
                 case 'hour':
                     $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addHours( 0 - $this->timeLength)->timestamp;
@@ -169,20 +172,45 @@ class ChartController extends Controller{
             //$this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addMinutes( -60 * $this->hours)->timestamp;
         }
         else {
+            // 如果datetime没有设置，计算其他数据
             $this->end_time = Carbon::now($this->timeZone);
             $this->end_time->second = 0;
-            // 对于凌晨的时候特殊处理，否则会出现错误
-            if(!($this->end_time->hour == 0 && $this->end_time->minute < 30)) {
-                $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
-                $this->end_time->addMinutes(-15);
+            // 结束时间设置为当前时间往前15分钟，且必须为5的倍数
+            $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
+            $this->end_time->addMinutes( -15 );
+            $datetime = $this->timeStampToString($this->end_time->timestamp);
+            switch($this->range){
+                case null:
+                    // 对于凌晨的时候特殊处理，否则会出现错误
+                    if(!($this->end_time->hour == 0 && $this->end_time->minute < 30))
+                        $this->start_time = Carbon::today($this->timeZone)->timestamp;
+                    else
+                        $this->start_time = Carbon::today($this->timeZone)->addHours( - 2 )->timestamp;
+                    $this->timeLength = floor(($this->end_time->timestamp - $this->start_time) / 3600);
+                    $this->range = 'hour';
+                    break;
+                case 'minute':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addMinutes( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'hour':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addHours( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'day':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addDays( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'week':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addWeeks( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'month':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addMonths( 0 - $this->timeLength)->timestamp;
+                    break;
+                case 'year':
+                    $this->start_time = Carbon::createFromFormat('Y-m-d H:i', $datetime, $this->timeZone)->addYears( 0 - $this->timeLength)->timestamp;
+                    break;
             }
             $this->end_time = $this->end_time->timestamp;
-            $this->start_time = Carbon::today($this->timeZone)->timestamp;
-            // 如果datetime没有设置，其他设置都无效，计算其他数据
-            $this->timeLength = floor(($this->end_time - $this->start_time) / 3600);
-            $this->range = 'hour';
         }
-        // 如果设置了split则采用，否则直接按照5分钟一个点来设置
+        // 如果设置了split则采用，否则统一25个点
         if(Request::has('split') && !empty(Request::input('split')) )
             $this->split_number = Request::input('split');
         else
@@ -195,8 +223,10 @@ class ChartController extends Controller{
         $this->data['timeLength'] = $this->timeLength;
 
         $result = $this->end_time - $this->start_time;
+        //从这里可以知道split至少为2
         $this->split_space = $result / ($this->split_number-1);
         $this->data['space'] = $this->split_space;
+        $this->data['nextDatetime'] = $this->timeStampToString($this->end_time + $this->split_space);
         //构建等间隔时间点数组
         //第一个点为开始点往前推算split_space时间间隔的点，用于计算第一个时间点的值,offset 为 -1
         //实际上timePoints数组有split_number + 1个点但是由于第一个点下标为-1,所以前端并不会使用，而会忽略这个下标为-1的点
@@ -365,7 +395,7 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart3());
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
-        return json_encode(['charts'=>$charts]);
+        return json_encode(['charts'=>$charts,'data'=>$this->data]);
     }
 
     public function testDiagram()

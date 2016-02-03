@@ -7,9 +7,9 @@ function realtimeToggle(button)
     if($(button).hasClass('btn-default')) {
         $(button).removeClass('btn-default');
         $(button).addClass('btn-info');
-        //2分钟一次更新
-        timeoutId = setInterval('ajaxCharts()', 1000 * 120);
-        ajaxCharts();
+        //5分钟一次更新
+        timeoutId = setInterval('ajaxUpdateCharts()', 1000 * 60 * 5);
+        baseSetCharts();
     }
     else
     {
@@ -18,20 +18,64 @@ function realtimeToggle(button)
         clearInterval(timeoutId);
     }
 }
-function ajaxCharts()
+function baseSetCharts()
 {
     var addr = 'realtime';
-    var data = {'hours':2, 'split':25};
-    //var data = {};
-    var recallfunc = updateCharts;
+    var data = {range : 'hour',timelength : 2, split : 25};
+    var recallfunc = allReplaceCharts;
     ajaxData(addr, data, recallfunc);
 }
-function updateCharts(result, status)
+function ajaxUpdateCharts()
+{
+    var addr = 'realtime';
+    var newDate = new Date()
+    var data = {range : 'minute',timelength : 5, split : 2, datetime : globalData['nextDatetime']};
+    var recallfunc = partReplaceCharts;
+    ajaxData(addr, data, recallfunc);
+}
+function allReplaceCharts(result, status)
+{
+    var result = JSON.parse(result);
+    //console.log(result);
+    //更新全局变量data
+    globalData = result['data'];
+    for(var i = 0; i < result['charts'].length; i++)
+        allConfigChart(result['charts'][i]);
+}
+function partReplaceCharts(result, status)
 {
     var result = JSON.parse(result);
     //console.log(result);
     for(var i = 0; i < result['charts'].length; i++)
-        configChart(result['charts'][i]);
+        partConfigChart(result['charts'][i]);
+}
+function allConfigChart(chartData)
+{
+    //获取全局的chart和对应option变量
+    var myChart = globalCharts[chartData['chartName']];
+    option = globalChartsOptions[chartData['chartName']];
+    for(var i = 0; i < chartData['names'].length; i++)
+    {
+        option.series[i].data = chartData['ypoints'][i];
+    }
+
+    option.xAxis[0].data = chartData['xpoints'];
+    myChart.setOption(option);
+}
+function partConfigChart(chartData)
+{
+    //获取全局的chart和对应option变量
+    var myChart = globalCharts[chartData['chartName']];
+    option = globalChartsOptions[chartData['chartName']];
+    for(var i = 0; i < chartData['names'].length; i++)
+    {
+        option.series[i].data.shift();
+        option.series[i].data.push(chartData['ypoints'][i][1]);
+    }
+
+    option.xAxis[0].data.shift();
+    option.xAxis[0].data.push(chartData['xpoints'][1]);
+    myChart.setOption(option);
 }
 function resizeHandle()
 {
@@ -43,75 +87,4 @@ function resizeHandle()
     for(var chartName in globalCharts) {
         globalCharts[chartName].resize();
     }
-}
-function configChart(chartData)
-{
-    var lines = [];
-    for(var i = 0; i < chartData['names'].length; i++)
-    {
-        var line = {};
-        line['name'] = chartData['names'][i];
-        //line['type'] = 'line';
-        //line['stack'] = '总量';
-        //line['itemStyle'] = {normal: {areaStyle: {type: 'default'}}};
-        line['data'] = chartData['ypoints'][i];
-        lines.push(line);
-    }
-    var option = {
-        xAxis: {
-            data : chartData['xpoints']
-        },
-        series : lines
-    };
-
-    var myChart = globalCharts[chartData['chartName']];
-    console.log(option);
-    myChart.setOption(option);
-    // 使用
-    /*require(
-        [
-            'echarts',
-            'echarts/chart/line',
-            'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
-        ],
-        function (ec) {
-            // 基于准备好的dom，初始化echarts图表
-            var myChart = ec.init(document.getElementById(chartData['chartName']));
-
-            var option = {
-                tooltip : {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data:chartData['names']
-                } ,
-                toolbox: {
-                    show : true,
-                    feature : {
-                        mark : {show: false},
-                        dataView : {show: true, readOnly: false},
-                        magicType : {show: true, type: ['stack', 'tiled']},
-                        restore : {show: true},
-                        saveAsImage : {show: true}
-                    }
-                },
-                calculable : false,
-                xAxis : [
-                    {
-                        type : 'category',
-                        boundaryGap : false,
-                        data : chartData['xpoints']
-                    }
-                ],
-                yAxis : [
-                    {
-                        type : 'value'
-                    }
-                ],
-                series : lines
-            };
-            // 为echarts对象加载数据
-            myChart.setOption(option);
-        }
-    );*/
 }

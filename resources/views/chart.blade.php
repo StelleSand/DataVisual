@@ -6,92 +6,83 @@
     if (height < 300)
         height = 300;
     $("#{{ $chartName }}").css('height',height.toString() + 'px');
-    // 使用
-    require(
-            [
-                'echarts',
-                'echarts/chart/line',
-                'echarts/chart/bar' // 使用柱状图就加载bar模块，按需加载
-            ],
-            function (ec) {
-                // 基于准备好的dom，初始化echarts图表
-                var myChart = ec.init(document.getElementById("{{  $chartName }}"));
+    // 基于准备好的dom，初始化echarts图表
+    var myChart = echarts.init(document.getElementById("{{  $chartName }}"));
 
-                var option = {
-                    tooltip : {
-                        trigger: 'axis'
-                    },
-                    legend: {
-                        data:<?php echo json_encode($names); ?>,
-                        padding : [5,0]
-                    },
-                    toolbox: {
-                        show : true,
-                        feature : {
-                            //mark : {show: false},
-                            //dataView : {show: true, readOnly: false},
-                            magicType : {show: true, type: ['line','bar','stack', 'tiled']},
-                            //restore : {show: true},
-                            saveAsImage : {show: true}
-                        }
-                    },
-                    calculable : false,
-                    xAxis : [
-                        {
-                            type : 'category',
-                            boundaryGap : false,
-                            data : <?php echo json_encode($xpoints); ?>
-                        }
-                    ],
-                    yAxis : [
-                        {
-                            type : 'value',
-                            axisLabel : {
-                                formatter: '{value} W'
-                            },
-                            name : '功率',
-                            nameLocation : 'end',
-                            min : 0
-                        },
-                        {
-                            type : 'value',
-                            axisLabel : {
-                                formatter: '{value}'
-                            },
-                            name : '销售额(元)/销量(份)',
-                            nameLocation : 'end',
-                            min : 0,
-                            position:'<?php foreach($types as $type) if($type == 'power') {echo 'right'; goto over;} echo 'left'; over:;  ?>',
-                        }
-                    ],
-                    series : [
-                        @for($i = 0 ; $i < count($names) ; $i++)
-                        {
-                            name:'{{$names[$i] }}',
-                            type:'line',
-                            yAxisIndex : {{ $types[$i] == 'power'? 0:1 }},
-                            stack: '{{ $types[$i] }}',
-                            clipOverflow : false,
-                            itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                            data:<?php echo json_encode($ypoints[$i]); ?>,
-                            @if($types[$i] == 'power')
-                            markLine : {
-                                data : [
-                                    {type : 'average', name: '平均{{ $names[$i] }}'}
-                                ]
-                            },
-                            @endif
-                        }
-                        @if($i < count($names) - 1 ) {{ ',' }}
-                        @endif
-                        @endfor
-                    ]
-                };
-                // 为echarts对象加载数据
-                myChart.setOption(option);
-                globalCharts['{{ $chartName }}'] = myChart;
+    var option = {
+        tooltip : {
+            trigger: 'axis'
+        },
+        legend: {
+            data:<?php echo json_encode($names); ?>,
+            padding : [5,0]
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                //mark : {show: false},
+                //dataView : {show: true, readOnly: false},
+                magicType : {show: true, type: ['line','bar','stack', 'tiled']},
+                //restore : {show: true},
+                saveAsImage : {show: true}
             }
-    );
+        },
+        calculable : false,
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                data : <?php echo json_encode($xpoints); ?>
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value',
+                axisLabel : {
+                    formatter: '{value} W'
+                },
+                name : '功率',
+                nameLocation : 'end',
+                min : 0
+            },
+            {
+                type : 'value',
+                axisLabel : {
+                    formatter: '{value}'
+                },
+                name : '销售额(元)/销量(份)',
+                nameLocation : 'end',
+                min : 0,
+                position:'<?php foreach($types as $type) if($type == 'power') {echo 'right'; goto over;} echo 'left'; over:;  ?>',
+            }
+        ],
+        series : [
+            @for($i = 0 ; $i < count($names) ; $i++)
+            {
+                name:'{{$names[$i] }}',
+                type:'line',
+                yAxisIndex : {{ $types[$i] == 'power'? 0:1 }},
+                stack: '{{ $types[$i] }}',
+                clipOverflow : false,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                data:<?php echo json_encode($ypoints[$i]); ?>,
+                @if($types[$i] == 'power')
+                markLine : {
+                    data : [
+                        {type : 'average', name: '平均{{ $names[$i] }}'}
+                    ]
+                },
+                @endif
+            }
+            @if($i < count($names) - 1 ) {{ ',' }}
+            @endif
+            @endfor
+        ]
+    };
+    // 为echarts对象加载数据
+    myChart.setOption(option);
+    globalCharts['{{ $chartName }}'] = myChart;
+    globalChartsOptions['{{ $chartName }}'] = option;
 </script>
 <div class="container">
     <div class="row">

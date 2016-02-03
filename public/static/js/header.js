@@ -105,8 +105,8 @@ function getMessageAlert(alertClass,label,message)
 }
 //用消息提示框显示消息
 function showMessage(messageContent){
-    $('#message-content').empty();
-    $('#message-content').append(messageContent);
+    $('#messageModelBody').empty();
+    $('#messageModelBody').append(messageContent);
     $('#messageModel').modal('show');
 }
 //按照Bootstrap标准格式——Div+label+input组合生成一个表单输入框
