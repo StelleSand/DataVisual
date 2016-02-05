@@ -2,34 +2,83 @@
  * Created by v5 on 2016/1/27.
  */
 var timeoutId;
+var appendPoint = false;
 function realtimeToggle(button)
 {
+    // 获取检查过的数据
+    var data = getRealtimeData();
+    // 如果获取数据过程出错，结束函数
+    if(data == 0)
+        return;
     if($(button).hasClass('btn-default')) {
         $(button).removeClass('btn-default');
         $(button).addClass('btn-info');
-        //5分钟一次更新
+        $(button).text('Real Time On!');
+        var timeSpace = 0;
+        if(data['type'] == 'window')
+            appendPoint = true;
+        else if(data['type'] == 'append')
+            appendPoint = false;
+        // 5分钟一次更新
         timeoutId = setInterval('ajaxUpdateCharts()', 1000 * 60 * 5);
-        baseSetCharts();
+        baseSetCharts(data);
     }
     else
     {
         $(button).removeClass('btn-info');
         $(button).addClass('btn-default');
+        $(button).text('Real Time!');
         clearInterval(timeoutId);
     }
 }
-function baseSetCharts()
+// 检查并获取realtime相关数据
+function getRealtimeData(){
+    var data = {};
+    var hours = $('#real_time_hours').val();
+    if(isNaN(hours) || isNull(hours))
+    {
+        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Time Length!'}];
+        showAlertMessages(messages);
+        return 0;
+    }
+    else
+        data['hours'] = hours;
+    var split = $('#real_time_split').val();
+    if(isNaN(split) || isNull(split))
+    {
+        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Split Number!'}];
+        showAlertMessages(messages);
+        return 0;
+    }
+    else
+        data['split'] = split;
+    var type = $('#real_time_type').val();
+    if(isNull(type))
+    {
+        var messages = [{class:'alert-warning', message:'Undefined Parameter in Real-Time Illustration!'}];
+        showAlertMessages(messages);
+        return 0;
+    }
+    data['type'] = type;
+    return data;
+}
+//ajax方式获取数据并完全替换数据
+function baseSetCharts(data)
 {
     var addr = 'realtime';
-    var data = {range : 'hour',timelength : 2, split : 25};
+    var sendData = {};
+    if(data['type'] == 'window')
+        sendData = {range : 'hour',timelength : data['hours'], split : data['split']};
+    else if(data['type'] == 'append')
+        sendData = { spilt : data['split'] };
     var recallfunc = allReplaceCharts;
-    ajaxData(addr, data, recallfunc);
+    ajaxData(addr, sendData, recallfunc);
 }
+//ajax方式获取数据并更新数据
 function ajaxUpdateCharts()
 {
     var addr = 'realtime';
-    var newDate = new Date()
-    var data = {range : 'minute',timelength : 5, split : 2, datetime : globalData['nextDatetime']};
+    var data = {range : 'minute',timelength : Math.floor(globalData['space'] / 60), split : 2, datetime : globalData['nextDatetime']};
     var recallfunc = partReplaceCharts;
     ajaxData(addr, data, recallfunc);
 }
@@ -41,6 +90,7 @@ function allReplaceCharts(result, status)
     for(var i = 0; i < result['charts'].length; i++)
         allConfigChart(result['charts'][i]);
 }
+//部分替换图表数据函数，ajax回调使用,用于展示windows类型窗口
 function partReplaceCharts(result, status)
 {
     var result = JSON.parse(result);
@@ -49,6 +99,7 @@ function partReplaceCharts(result, status)
     for(var i = 0; i < result['charts'].length; i++)
         partConfigChart(result['charts'][i]);
 }
+// 图表数据更新函数,用于进行全部替换更新
 function allConfigChart(chartData)
 {
     //获取全局的chart和对应option变量
@@ -72,6 +123,7 @@ function allConfigChart(chartData)
     option.xAxis[0].data = chartData['xpoints'];
     myChart.setOption(option);
 }
+// 图表数据更新函数,用于进行window类型或append类型更新
 function partConfigChart(chartData)
 {
     //获取全局的chart和对应option变量
@@ -79,7 +131,9 @@ function partConfigChart(chartData)
     option = globalChartsOptions[chartData['chartName']];
     for(var i = 0; i < chartData['names'].length; i++)
     {
-        option.series[i].data.shift();
+        // 如果不是叠加模式，则移除最开始的点
+        if(!appendPoint)
+            option.series[i].data.shift();
         option.series[i].data.push(chartData['ypoints'][i][1]);
         var data = option.series[i].data;
         var result = 0;
@@ -93,8 +147,9 @@ function partConfigChart(chartData)
         var accumulationValue = Math.floor(result * factor);
         $('#accumulation_' + chartData['chartName'] + '_' + i.toString()).text(accumulationValue.toString());
     }
-
-    option.xAxis[0].data.shift();
+    // 如果不是叠加模式，则移除最开始的点
+    if(!appendPoint)
+        option.xAxis[0].data.shift();
     option.xAxis[0].data.push(chartData['xpoints'][1]);
     myChart.setOption(option);
 }

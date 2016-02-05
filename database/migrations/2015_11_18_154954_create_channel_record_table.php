@@ -20,6 +20,7 @@ class CreateChannelRecordTable extends Migration
             $table->enum('record_type',array('power','temperature'))->default('power');
             $table->dateTime('date');
             $table->double('value');
+            $table->index('date');
         });
     }
 
