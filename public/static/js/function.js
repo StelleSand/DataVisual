@@ -20,7 +20,7 @@ function realtimeToggle(button)
         else if(data['type'] == 'append')
             appendPoint = false;
         // 5分钟一次更新
-        timeoutId = setInterval('ajaxUpdateCharts()', 1000 * 60 * globalData['space']);
+        timeoutId = setInterval('ajaxUpdateCharts()', 1000 * globalData['space']);
         baseSetCharts(data);
     }
     else

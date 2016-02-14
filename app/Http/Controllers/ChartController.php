@@ -211,13 +211,17 @@ class ChartController extends Controller{
             $this->end_time = $this->end_time->timestamp;
         }
         // 如果设置了split则采用
-        if(Request::has('split') && !empty(Request::input('split')) )
-            $this->split_number = Request::input('split');
+        if(Request::has('split') && !empty(Request::input('split')) ) {
+            $this->split_number = floor(Request::input('split'));
+            if($this->split_number < 2) $this->split_number = 25;
+        }
         // 否则如果提交了时间间隔 interval 参数，则按interval计算,interval单位必须为minutes
         else if(Request::has('interval') && !empty(Request::input('interval'))) {
             $interval = Request::input('interval');
+            if($interval <= 0 ) $interval = 1;
             //获取分割出来的点数
             $gaps = floor(($this->end_time - $this->start_time) / 60 / $interval);
+            if($gaps < 1) $gaps = 1;
             $this->split_number = $gaps + 1;
             //调整结束时间以适应 interval 设置
             $this->end_time = $this->start_time +  60 * $gaps * $interval;
