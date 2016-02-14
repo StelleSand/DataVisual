@@ -68,11 +68,11 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="timelength" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Split Number</label>
+                                <label for="timelength" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Interval</label>
                                 <div class="col-sm-6 col-xs-6 col-md-4">
                                     <div class="input-group">
-                                        <input id="split" name="split" type="number" min="5" step="1" class="form-control" value="{{ $data['split'] }}" placeholder="{{ $data['split'] }}">
-                                        <span class="input-group-addon">Points</span>
+                                        <input id="interval" name="interval" type="number" min="1" step="1" class="form-control" value="{{ floor($data['space'] / 60) }}" placeholder="{{ floor($data['space'] / 60) }}">
+                                        <span class="input-group-addon">Minutes</span>
                                     </div>
                                 </div>
                             </div>
@@ -99,24 +99,6 @@
                     <div class="form-horizontal" role="realTimeInfo">
                         <div id="real-time-form-div" class="form-group">
                             <div class="form-group">
-                                <label for="real_time_hours" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Time Length</label>
-                                <div class="col-sm-6 col-xs-6 col-md-4">
-                                    <div class="input-group">
-                                        <input id="real_time_hours" type="number" min="1" step="1" class="form-control" value="2" placeholder="2">
-                                        <span class="input-group-addon" id="timeUnit">Hours</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="real_time_split" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Split Number</label>
-                                <div class="col-sm-6 col-xs-6 col-md-4">
-                                    <div class="input-group">
-                                        <input id="real_time_split" type="number" min="5" step="1" class="form-control" value="25" placeholder="25">
-                                        <span class="input-group-addon">Points</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label for="range" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Illustration</label>
                                 <div class="col-sm-6 col-xs-6 col-md-4">
                                     <div class="input-group">
@@ -124,10 +106,28 @@
                                         <div class="input-group-btn">
                                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Type <span class="caret"></span></button>
                                             <ul class="dropdown-menu">
-                                                <li><a onclick="$('#real_time_type').val('append');">Append</a></li>
-                                                <li><a onclick="$('#real_time_type').val('window');">Window</a></li>
+                                                <li><a onclick="$('#real_time_type').val('append');$('#timeLengthDiv').addClass('hidden');">Append</a></li>
+                                                <li><a onclick="$('#real_time_type').val('window');$('#timeLengthDiv').removeClass('hidden');">Window</a></li>
                                             </ul>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="real_time_split" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Interval</label>
+                                <div class="col-sm-6 col-xs-6 col-md-4">
+                                    <div class="input-group">
+                                        <input id="real_time_interval" type="number" min="1" step="1" class="form-control" value="5" placeholder="5">
+                                        <span class="input-group-addon">Minutes</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="timeLengthDiv" class="form-group">
+                                <label for="real_time_hours" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Time Length</label>
+                                <div class="col-sm-6 col-xs-6 col-md-4">
+                                    <div class="input-group">
+                                        <input id="real_time_hours" type="number" min="1" step="1" class="form-control" value="2" placeholder="2">
+                                        <span class="input-group-addon" id="timeUnit">Hours</span>
                                     </div>
                                 </div>
                             </div>

@@ -20,7 +20,7 @@ function realtimeToggle(button)
         else if(data['type'] == 'append')
             appendPoint = false;
         // 5分钟一次更新
-        timeoutId = setInterval('ajaxUpdateCharts()', 1000 * 60 * 5);
+        timeoutId = setInterval('ajaxUpdateCharts()', 1000 * 60 * globalData['space']);
         baseSetCharts(data);
     }
     else
@@ -34,32 +34,27 @@ function realtimeToggle(button)
 // 检查并获取realtime相关数据
 function getRealtimeData(){
     var data = {};
-    var hours = $('#real_time_hours').val();
-    if(isNaN(hours) || isNull(hours))
-    {
-        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Time Length!'}];
-        showAlertMessages(messages);
-        return 0;
-    }
-    else
-        data['hours'] = hours;
-    var split = $('#real_time_split').val();
-    if(isNaN(split) || isNull(split))
-    {
-        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Split Number!'}];
-        showAlertMessages(messages);
-        return 0;
-    }
-    else
-        data['split'] = split;
-    var type = $('#real_time_type').val();
-    if(isNull(type))
+    data['type'] = $('#real_time_type').val();
+    if(isNull(data['type']))
     {
         var messages = [{class:'alert-warning', message:'Undefined Parameter in Real-Time Illustration!'}];
         showAlertMessages(messages);
         return 0;
     }
-    data['type'] = type;
+    data['interval'] = $('#real_time_interval').val();
+    if(isNaN(data['interval']) || isNull(data['interval']))
+    {
+        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Split Number!'}];
+        showAlertMessages(messages);
+        return 0;
+    }
+    data['hours'] = $('#real_time_hours').val();
+    if(data['type'] == 'window' && (isNaN(data['hours']) || isNull(data['hours'])))
+    {
+        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Time Length!'}];
+        showAlertMessages(messages);
+        return 0;
+    }
     return data;
 }
 //ajax方式获取数据并完全替换数据
@@ -68,9 +63,9 @@ function baseSetCharts(data)
     var addr = 'realtime';
     var sendData = {};
     if(data['type'] == 'window')
-        sendData = {range : 'hour',timelength : data['hours'], split : data['split']};
+        sendData = {range : 'hour',timelength : data['hours'], interval : data['interval']};
     else if(data['type'] == 'append')
-        sendData = { spilt : data['split'] };
+        sendData = { interval : data['interval'] };
     var recallfunc = allReplaceCharts;
     ajaxData(addr, sendData, recallfunc);
 }

@@ -175,9 +175,9 @@ class ChartController extends Controller{
             // 如果datetime没有设置，计算其他数据
             $this->end_time = Carbon::now($this->timeZone);
             $this->end_time->second = 0;
-            // 结束时间设置为当前时间往前15分钟，且必须为5的倍数
+            // 结束时间设置为当前时间往前5分钟，且必须为5的倍数
             $this->end_time->minute = floor($this->end_time->minute / 5) * 5;
-            $this->end_time->addMinutes( -15 );
+            $this->end_time->addMinutes( -5 );
             $datetime = $this->timeStampToString($this->end_time->timestamp);
             switch($this->range){
                 case null:
@@ -210,17 +210,22 @@ class ChartController extends Controller{
             }
             $this->end_time = $this->end_time->timestamp;
         }
-        // 如果设置了split则采用，否则统一25个点
+        // 如果设置了split则采用
         if(Request::has('split') && !empty(Request::input('split')) )
             $this->split_number = Request::input('split');
+        // 否则如果提交了时间间隔 interval 参数，则按interval计算,interval单位必须为minutes
+        else if(Request::has('interval') && !empty(Request::input('interval'))) {
+            $interval = Request::input('interval');
+            //获取分割出来的点数
+            $gaps = floor(($this->end_time - $this->start_time) / 60 / $interval);
+            $this->split_number = $gaps + 1;
+            //调整结束时间以适应 interval 设置
+            $this->end_time = $this->start_time +  60 * $gaps * $interval;
+            }
+        //啥都没有，设置split_number为25
         else
             $this->split_number = 25;
             //$this->split_number = ($this->end_time - $this->start_time) / 300 + 1;
-        //设置相关全局返回数据
-        $this->data['datetime'] = $this->timeStampToString($this->end_time);
-        $this->data['split'] = $this->split_number;
-        $this->data['range'] = $this->range;
-        $this->data['timeLength'] = $this->timeLength;
 
         $result = $this->end_time - $this->start_time;
         //从这里可以知道split至少为2
@@ -242,6 +247,11 @@ class ChartController extends Controller{
             array_push($this->timePoints, $time_point);
             array_push($this->timePointsString, $this->timeStampToString($time_point));
         }
+        //设置相关全局返回数据
+        $this->data['datetime'] = $this->timeStampToString($this->end_time);
+        $this->data['split'] = $this->split_number;
+        $this->data['range'] = $this->range;
+        $this->data['timeLength'] = $this->timeLength;
     }
 
     protected function timeStampToString($time)
