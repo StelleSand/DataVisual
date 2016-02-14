@@ -44,7 +44,7 @@ function getRealtimeData(){
     data['interval'] = $('#real_time_interval').val();
     if(isNaN(data['interval']) || isNull(data['interval']))
     {
-        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Split Number!'}];
+        var messages = [{class:'alert-warning', message:'Illegal Input in Real-Time Interval!'}];
         showAlertMessages(messages);
         return 0;
     }
@@ -129,6 +129,8 @@ function partConfigChart(chartData)
         // 如果不是叠加模式，则移除最开始的点
         if(!appendPoint)
             option.series[i].data.shift();
+        //先用最新值更新已有数据最新一个点,然后推入一个最新点
+        option.series[i].data[option.series[i].data.length - 1] = chartData['ypoints'][i][0];
         option.series[i].data.push(chartData['ypoints'][i][1]);
         var data = option.series[i].data;
         var result = 0;
