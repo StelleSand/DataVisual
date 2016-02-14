@@ -16,12 +16,13 @@ function realtimeToggle(button)
         $(button).text('Real Time On!');
         var timeSpace = 0;
         if(data['type'] == 'window')
-            appendPoint = true;
-        else if(data['type'] == 'append')
             appendPoint = false;
-        // 5分钟一次更新
-        timeoutId = setInterval('ajaxUpdateCharts()', 1000 * globalData['space']);
+        else if(data['type'] == 'append')
+            appendPoint = true;
+        // 页面全为同步ajax调用，非常降低用户体验，但是测试显示，为了正确性必须这么做
         baseSetCharts(data);
+        // 根据space决定更新间隔
+        timeoutId = setInterval(ajaxUpdateCharts, 1000 * globalData['space']);
     }
     else
     {
@@ -72,6 +73,7 @@ function baseSetCharts(data)
 //ajax方式获取数据并更新数据
 function ajaxUpdateCharts()
 {
+    console.log('intoUpdate!');
     var addr = 'realtime';
     var data = {range : 'minute',timelength : Math.floor(globalData['space'] / 60), split : 2, datetime : globalData['nextDatetime']};
     var recallfunc = partReplaceCharts;

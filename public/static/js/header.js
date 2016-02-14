@@ -2,7 +2,8 @@ $(function(){
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
+        },
+        async : false
     });
     //ajax全局设置，加上这个才能在laravel框架下ajax成功
     $( document ).ajaxError(function( event, request, settings ) {
