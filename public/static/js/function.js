@@ -73,7 +73,6 @@ function baseSetCharts(data)
 //ajax方式获取数据并更新数据
 function ajaxUpdateCharts()
 {
-    console.log('intoUpdate!');
     var addr = 'realtime';
     var data = {range : 'minute',timelength : Math.floor(globalData['space'] / 60), split : 2, datetime : globalData['nextDatetime']};
     var recallfunc = partReplaceCharts;
