@@ -21,8 +21,6 @@ function realtimeToggle(button)
             appendPoint = true;
         // 页面全为同步ajax调用，非常降低用户体验，但是测试显示，为了正确性必须这么做
         baseSetCharts(data);
-        // 根据space决定更新间隔
-        timeoutId = setInterval(ajaxUpdateCharts, 1000 * globalData['space']);
     }
     else
     {
@@ -85,6 +83,8 @@ function allReplaceCharts(result, status)
     globalData = result['data'];
     for(var i = 0; i < result['charts'].length; i++)
         allConfigChart(result['charts'][i]);
+    // 根据space决定更新间隔
+    timeoutId = setInterval(ajaxUpdateCharts, 1000 * globalData['space']);
 }
 //部分替换图表数据函数，ajax回调使用,用于展示windows类型窗口
 function partReplaceCharts(result, status)

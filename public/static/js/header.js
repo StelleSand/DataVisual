@@ -3,7 +3,7 @@ $(function(){
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        async : false
+        //async : false
     });
     //ajax全局设置，加上这个才能在laravel框架下ajax成功
     $( document ).ajaxError(function( event, request, settings ) {
@@ -12,20 +12,6 @@ $(function(){
     //为全局ajaxError事件注册消息提示框
 
 });
-//生成一个表单提交按钮，参数分别为 按钮文字、按钮blockclass、SizeClass、目标表单名字、按钮点击回调函数、ajax提交成功处理回调函数
-function getFormBtn(btnText,btnColor,btnBlock,btnSize,targetFormName,btnClickFunc,dataProcessFunc)
-{
-    var btn = $('<button></button>').append(btnText).addClass('btn').addClass(btnColor).addClass(btnBlock).addClass(btnSize).attr('data-form',targetFormName).attr('data-recall',dataProcessFunc).on('click',btnClickFunc);
-    return btn;
-}
-//通过表单提交按钮提交表单数据函数，对表单表头信息、提交按钮data-信息有要求
-function postFormByFormbtn()
-{
-    var formID = $(this).attr('data-form');
-    var postAddress = $('#' + formID).attr('data-target');
-    var recallFunc = $(this).attr('data-recall');
-    ajaxOneFormByID(formID,postAddress,recallFunc);
-}
 //通过表单ID ajax提交数据,并执行成功时的回调函数
 function ajaxOneFormByID(formID,postAddress,recallFunc,clearFormData)
 {
