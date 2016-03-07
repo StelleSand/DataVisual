@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\DB;
 use Excel;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Mockery\CountValidator\Exception;
+
 class InsertExcel extends Job implements SelfHandling, ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
@@ -154,19 +156,26 @@ class InsertExcel extends Job implements SelfHandling, ShouldQueue
                 continue;
             //拼接获取orderFile的全名，用于Excel加载
             $orderFileFullName = $this->excelRoot.$orderFileName;
-            Excel::load($orderFileFullName, function($reader) {
-                //set the timestamp format
-                $reader->setDateColumns(array('sendprint_date'));
-                $reader->setDateColumns(array('create_date'));
-                // Loop through all sheets
-                $reader->each(function($sheet) {
-                    // Loop through all rows
-                    $sheet->each(function($row) {
-                        $row = $row->toArray();
-                        $this->orderInsert($row);
+            try {
+                Excel::load($orderFileFullName, function ($reader) {
+                    //set the timestamp format
+                    $reader->setDateColumns(array('sendprint_date'));
+                    $reader->setDateColumns(array('create_date'));
+                    // Loop through all sheets
+                    $reader->each(function ($sheet) {
+                        // Loop through all rows
+                        $sheet->each(function ($row) {
+                            $row = $row->toArray();
+                            $this->orderInsert($row);
+                        });
                     });
                 });
-            });
+            }
+            catch(Exception $e)
+            {
+                //出错则是文件错误，直接删除文件，
+                Storage::delete($orderFileName);
+            }
             //如果设置为不保留源文件，运行完成后删除源文件;如果没有过插入记录，即为空文件，删除
             if($this->deleteSourceFile || !$this->hadInsertedOrders)
                 Storage::delete($orderFileName);
