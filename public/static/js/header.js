@@ -26,9 +26,18 @@ function getFormData(formElement,clearFormData){
         var name = $(this).attr('name');
         if(name) {
             var val = $(this).val();
-            if(!val)
-                val = $(this).attr('placeholder');
-            data[name] = val;
+            /*if(!val)
+                val = $(this).attr('placeholder');*/
+            if($(this).attr('data-array')==='1')//means to use array data
+                if(data[name])
+                    data[name].push(val);
+                else
+                {
+                    data[name] = [];
+                    data[name].push(val);
+                }
+            else
+                data[name] = val;
         }
         if(clear) $(this).val('');
         if(isNull(data[name])) {
@@ -75,12 +84,25 @@ function showAjaxError(ErrorType,status,message,responseText){
 //用消息提示框展示ajax返回的消息的函数，参数为ajax的结果，
 function showAlertMessages(messages,status){
     var messagesContent;
+    messagesContent = $('<div></div>').addClass('messageContent');
     for(var i = 0 ; i < messages.length ; i++)
     {
-        if(i == 0) messagesContent = getMessageAlert(messages[i]['class'],null,messages[i]['message']);
-        else $(messagesContent).after(getMessageAlert(messages[i]['class'],null,messages[i]['message']));
+        $(messagesContent).append(getMessageAlert(messages[i]['class'], null, messages[i]['message']));
     }
     showMessage(messagesContent);
+}
+
+//用消息提示框展示ajax返回的消息的函数，参数为ajax的结果，
+function showAjaxMessages(result,status){
+    var resultObj;
+    resultObj = JSON.parse(result);
+    var messages = resultObj['messages'];
+    for(var i = 0 ; i < messages.length ; i++)
+    {
+        var content = messages[i];
+        messages[i] = {'message':content,'class':'alert-info'};
+    }
+    showAlertMessages(messages, status);
 }
 //根据警告CLass，前置label、信息文字生成一个警告框的函数
 function getMessageAlert(alertClass,label,message)
@@ -88,7 +110,7 @@ function getMessageAlert(alertClass,label,message)
     var alertDiv = $('<div></div>').addClass('alert').addClass(alertClass);
     $(alertDiv).append(label);
     $(alertDiv).append(message);
-    return alertDiv
+    return alertDiv;
 }
 //用消息提示框显示消息
 function showMessage(messageContent){

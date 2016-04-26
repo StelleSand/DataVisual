@@ -50,7 +50,7 @@
                             <div class="form-group">
                                 <label for="datetimepicker" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-sm-3 col-xs-3 col-md-2 control-label">Check Time</label>
                                 <div class="col-sm-6 col-xs-6 col-md-4">
-                                    <div class="input-group date" id="datetimeDiv" data-date="{{ $data['datetime'] }}" data-date-format="yyyy-mm-dd hh:ii" data-link-field="datetimepicker" data-link-format="yyyy-mm-dd hh:ii">
+                                    <div class="input-group date datetimeDiv" id="checkTimePicker" data-date="{{ $data['datetime'] }}" data-date-format="yyyy-mm-dd hh:ii" data-link-field="datetimepicker" data-link-format="yyyy-mm-dd hh:ii">
                                         <input class="form-control" type="text" value="{{ $data['datetime'] }}" placeholder="{{ $data['datetime'] }}" readonly>
                                         <span class="input-group-addon"><i class="glyphicon glyphicon-remove"></i></span>
                                         <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
@@ -141,10 +141,56 @@
                 </div>
             </div>
         </div>
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="referenceSettingHeading">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#referenceSettingCollapse" aria-expanded="false" aria-controls="referenceSettingCollapse">
+                        Reference Factor Setting
+                    </a>
+                </h4>
+            </div>
+            <div id="referenceSettingCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="referenceSettingHeading">
+                <div class="panel-body">
+                    <div class="form-horizontal" role="referenceSettingInfo">
+                        <div id="reference_setting_form_div" class="form-group">
+                            <div class="form-group">
+                                <label class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-sm-2 col-xs-2 col-md-2 control-label">Interval Attribute</label>
+                                <div class="col-sm-9 col-md-9">
+                                    @if(count($data['references']) == 0)
+                                        @include('referenceSetting', ['reference'=>null])
+                                    @else
+                                        @foreach($data['references'] as $reference)
+                                            @include('referenceSetting', ['reference'=>$reference->toArray()])
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="real_time_hours" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-sm-2 col-xs-2 col-md-2 control-label">Manager Password</label>
+                                <div class="col-sm-6 col-xs-6 col-md-4">
+                                    <input class="form-control" name="reference_setting_password" type="password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-offset-4 col-sm-offset-4 col-md-offset-4 col-sm-6 col-xs-6 col-md-4">
+                                <button type="button" onclick="submitReferenceSetting()" class="btn btn-default">Update Reference Setting</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
-    $('#datetimeDiv ').datetimepicker();
+    $('#checkTimePicker ').datetimepicker({
+        format: 'yyyy-mm-dd hh:ii'
+    });
+    $('.referenceDatetimeDiv').datetimepicker({
+        format: 'yyyy-mm-dd',
+        minView:'month'
+    });
     $("#nav-form-div").children('br').remove();
     // 路径配置
     /*require.config({
@@ -157,8 +203,6 @@
     var globalChartsOptions = {};
     var globalData = <?php unset($data['user']); echo json_encode($data); ?>;
 </script>
-<?php
-?>
 @foreach($charts as $chart)
     <?php $chart['data'] = $data;?>
     @include('chart',$chart)

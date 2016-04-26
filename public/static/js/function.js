@@ -162,3 +162,46 @@ function resizeHandle()
         globalCharts[chartName].resize();
     }
 }
+//用来在reference setting设置中加入一行设定
+function addReferenceSettingLine(btn)
+{
+    var node = $(btn).parents('.reference_setting_interval').clone(true);
+    $(btn).parents('.reference_setting_interval').after(node);
+    //粘贴到当前行后
+    var startInputs = $(node).find('[name="interval_start"]');
+    var endInputs = $(node).find('[name="interval_end"]');
+    $(startInputs[0]).val($(endInputs[0]).val());
+}
+//用来在reference setting设置中删除当前行
+function deleteReferenceSettingLine(btn)
+{
+    var div = $(btn).parents('.reference_setting_interval');
+    $(div).remove();
+}
+function switchReferenceType(btn,type)
+{
+    var inputValue = $(btn).parents('.input-group').children('.inputValue');
+    var referenceType = $(btn).parents('.input-group').children('[name="interval_type"]');
+    if(type === 'manual' && $(referenceType).val() === 'date')
+    {
+        $(inputValue).val('');
+        $(inputValue).attr('type','number');
+        $(referenceType).val('manual');
+    }
+    else if(type === 'date' && $(referenceType).val() === 'manual')
+    {
+        $(inputValue).val('');
+        $(inputValue).attr('type','date');
+        $(referenceType).val('date');
+    }
+}
+function submitReferenceSetting()
+{
+    try {
+        ajaxOneFormByID('reference_setting_form_div', 'referenceSetting', showAjaxMessages, false);
+    }
+    catch(e)
+    {
+        showMessage(e.message);
+    }
+}

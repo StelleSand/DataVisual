@@ -32,28 +32,25 @@ class Channel extends Model {
      * 获取ChannelRecord数据的平均值
      * 参数为(较早时间点时间戳,较晚时间点时间戳);
      * 函数会计算两个时间点之间的Channel_Power加权平均值作为平均返回。
+     * 此函数适用于实际查询，要求两个时间点之间间隔较小，否则误差较大
      * 实际用法为Channel::find(channel_id)->getAverageValue(low,high);
      * */
     public function getAveragePower($timeStringLow,$timeStringHigh )
     {
-        /*
-        //选取对应时间段数据
-        $records = $this->records()->whereBetween('date',array($timeStringLow,$timeStringHigh))->where('record_type','=','power')->get();
-        $records_sum = 0;
-        //获取对应时间点附近数据和
-        foreach($records as $record)
-        {
-            $records_sum += $record->value;
-        }
-        //求对应时间点附近最终数据值
-        //防止除0
-        if(count($records) == 0)
-            $average_value = 0;
-        else
-            $average_value = $records_sum / count($records);
-        return $average_value;
-        */
         return  $this->records()->whereBetween('date',array($timeStringLow,$timeStringHigh))->where('record_type','=','power')->avg('value');
+    }
+
+    //获得指定channel在指定时间段之内的累计用电量，单位为焦耳J
+    public function getCumulativePower($timeStringLow,$timeStringHigh)
+    {
+        $records = $this->records()->whereBetween('date',array($timeStringLow,$timeStringHigh))->where('record_type','=','power')->orderBy('date')->get();
+        $sum = 0;
+        for($i = 0; $i < count($records); $i++) {
+            if (isset($records[$i + 1])) {//对于最后一个元素不进行累加
+                $sum += $records[$i]->getCalculativePower($records[$i + 1]);
+            }
+        }
+        return $sum;
     }
 
 }

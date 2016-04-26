@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="b58e68ff-60d7-4ac0-b0d6-9b29c5225f7e" name="DataVisual" url="http://112.126.73.8/">
+        <fileTransfer host="112.126.73.8" port="21" rootFolder="/var/www/DataVisual" password="dfcedfcbdfdedfcbdfdcdfc3dfd9dfdfdfcbdfc6" username="datavisual">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" showHiddenFiles="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

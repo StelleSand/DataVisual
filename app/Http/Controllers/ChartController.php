@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use App\MerchandiseClass;
 use App\Channel;
 use Request;
+use App\Reference;
 class ChartController extends Controller{
     protected $start_time;//起始时间
     protected $end_time;//结束时间
@@ -256,12 +257,18 @@ class ChartController extends Controller{
         $this->data['split'] = $this->split_number;
         $this->data['range'] = $this->range;
         $this->data['timeLength'] = $this->timeLength;
+        $this->data['references'] = Reference::all();
     }
 
     protected function timeStampToString($time)
     {
         //return date('Y-m-d H:i:s',$time);
         return Carbon::createFromTimestamp($time, $this->timeZone)->format('Y-m-d H:i');
+    }
+
+    protected function stringToCarbon($string)
+    {
+        return Carbon::createFromFormat('Y-m-d H:i', $string, $this->timeZone);
     }
 
     /*
@@ -400,7 +407,7 @@ class ChartController extends Controller{
         return $result;
     }
 
-    public function ajaxTestDiagram()
+    public function ajaxRealTime()
     {
         $this->init();
         $charts = array();
@@ -410,6 +417,79 @@ class ChartController extends Controller{
         array_push($charts,$this->makeChart4());
         array_push($charts,$this->makeChart5());
         return json_encode(['charts'=>$charts,'data'=>$this->data]);
+    }
+
+    //处理前端提交的ReferenceSetting请求
+    public function ajaxReferenceSetting()
+    {
+        $messages = [];
+        $inputs = Request::all();
+        if($inputs['reference_setting_password'] != 'buaa#2016')
+        {
+            array_push($messages, 'Operation Failed! Illegal manager password!');
+            return json_encode(['messages'=>$messages]);
+        }
+        Reference::deleteAllData();
+        array_push($messages, 'Old Reference Settings Cleared!');
+        for($i = 0; $i < count($inputs['interval_type']); $i++)
+        {
+            $reference = new Reference();
+            $reference->start = $inputs['interval_start'][$i];
+            $reference->end = $inputs['interval_end'][$i];
+            $reference->attribute = $inputs['interval_attr'][$i];
+            $reference->powercost = $inputs['interval_powercost'][$i];
+            $value = $inputs['interval_value'][$i];
+            $type = $inputs['interval_type'][$i];
+            if($type == 'manual')
+                $reference->value = round($value, 4);
+            else if($type = 'date')
+                $this->calculateReferenceValue($reference, $value);
+            $reference->save();
+        }
+        array_push($messages, 'Success! New Reference Settings Updated!');
+        return json_encode(['messages'=>$messages]);
+    }
+
+    protected function calculateReferenceValue($reference, $value)
+    {
+        $timeStringLow = $value.' '.$reference->start;
+        $timeStringHigh = $value.' '.$reference->end;
+        $allPowerChannel = Channel::find($this->const_allPowerID);
+        //获取所消耗的电量，单位是J，注意转换为KWH
+        $intervalPowerCost = round($allPowerChannel->getCumulativePower($timeStringLow, $timeStringHigh) / 3600000, 3);
+        $intervalMoneyCost = round($reference->powercost * $intervalPowerCost, 2);// 此处单位已转换为对应单位
+        if($reference->attribute == 'N')
+        {
+            $startCarbon = $this->stringToCarbon($timeStringLow);
+            $endCarbon = $this->stringToCarbon($timeStringHigh);
+            $timeInterval = $startCarbon->diffInMinutes($endCarbon, true) / 60;
+            $reference->value = round($intervalMoneyCost / $timeInterval, 4);
+        }
+        else
+        {
+            $saleAmount = $this->getAllMerchandiseClassSaleAmountInterval($timeStringLow,$timeStringHigh );
+            if($saleAmount != 0 &&  $intervalMoneyCost != 0)
+                $reference->value = round($intervalMoneyCost / $saleAmount, 4);
+            else if($saleAmount == 0 &&  $intervalMoneyCost != 0)
+                $reference->value = round($intervalMoneyCost, 4);//电费非零，销售为零时，销售额按1元计算
+            else if($saleAmount != 0 &&  $intervalMoneyCost == 0)
+                $reference->value = round(-1 * $saleAmount, 4);//电费为零，销售非零时,电费按-1元计算,并对结果取倒数
+            else if($saleAmount == 0 &&  $intervalMoneyCost == 0)
+                $reference->value = 0;//电费和销售都为零时，比值为零
+        }
+    }
+
+    //获取在两个时间点之内所有销售额
+    //用于ajaxReferenceSetting函数需要
+    protected function getAllMerchandiseClassSaleAmountInterval($timeStringLow,$timeStringHigh )
+    {
+        $merchandise_classes = $this->user->merchandiseClasses()->get();
+        $allSaleAmount = 0;
+        foreach($merchandise_classes as $merchandise_class)
+        {
+            $allSaleAmount += $merchandise_class->getCumulativeSaleAmount($timeStringLow,$timeStringHigh );
+        }
+        return $allSaleAmount;
     }
 
     public function testDiagram()

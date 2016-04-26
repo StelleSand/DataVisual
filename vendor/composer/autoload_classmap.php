@@ -19,6 +19,7 @@ return array(
     'CreateMerchandiseTable' => $baseDir . '/database/migrations/2015_11_18_152500_create_merchandise_table.php',
     'CreateOrderTable' => $baseDir . '/database/migrations/2015_11_18_152942_create_order_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
+    'CreateReferenceTable' => $baseDir . '/database/migrations/2016_04_24_075934_create_reference_table.php',
     'CreateUnitDeploymentTable' => $baseDir . '/database/migrations/2015_11_18_160930_create_unit_deployment_table.php',
     'CreateUnitTable' => $baseDir . '/database/migrations/2015_11_18_160506_create_unit_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',

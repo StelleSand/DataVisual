@@ -16,7 +16,9 @@ Route::get('/test', function () {
 });
 Route::get('/','ChartController@testDiagram');
 Route::post('/','ChartController@testDiagram');
-Route::post('realtime', 'ChartController@ajaxTestDiagram');
+Route::post('realtime', 'ChartController@ajaxRealTime');
+Route::post('referenceSetting', 'ChartController@ajaxReferenceSetting');
+
 Route::get('import', 'ExcelImportController@importRecord');
 Route::get('unit', 'UnitController@getUnit');
 Route::post('addUnit', 'UnitController@postAddUnit');
